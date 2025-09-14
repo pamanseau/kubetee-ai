@@ -1,0 +1,46 @@
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: memgraph-lib-storage
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   storageClassName: retain
+#   resources:
+#     requests:
+#       storage: 4.5T
+#   volumeName: pvc-fc30d4e1-c036-4702-9692-32a1235bdfc3
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: memgraph-restore-lib-storage
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   storageClassName: retain
+#   resources:
+#     requests:
+#       storage: 4.5T
+#   volumeName: memgraph-restore
+# ---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu
+spec:
+  containers:
+  - name: ubuntu
+    image: ubuntu:jammy
+    command:
+      - sleep
+      - "infinity"
+    imagePullPolicy: IfNotPresent
+    volumeMounts: 
+    - name: ubuntu-data-volume
+      mountPath: /data
+  nodeSelector: {}
+  volumes: 
+  - name: ubuntu-data-volume
+    persistentVolumeClaim:
+      claimName: memgraph-memgraph-0

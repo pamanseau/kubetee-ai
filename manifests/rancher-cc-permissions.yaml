@@ -1,0 +1,34 @@
+---
+# ClusterRole for Rancher-specific namespace management permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cc-operator-rancher-namespace-manager
+rules:
+# Permissions for Rancher projects and namespaces
+- apiGroups: ["management.cattle.io"]
+  resources: ["projects", "namespaces"]
+  verbs: ["get", "list", "update", "patch"]
+# Full permissions on core namespaces
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "update", "patch"]
+# Permissions to manage namespace labels
+- apiGroups: [""]
+  resources: ["namespaces"]
+  resourceNames: ["confidential-containers-system"]
+  verbs: ["*"]
+---
+# ClusterRoleBinding to grant the permissions to the operator
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cc-operator-rancher-namespace-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cc-operator-rancher-namespace-manager
+subjects:
+- kind: ServiceAccount
+  name: cc-operator-controller-manager
+  namespace: confidential-containers-system

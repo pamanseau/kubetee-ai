@@ -1,0 +1,26 @@
+apiVersion: mellanox.com/v1alpha1
+kind: NicClusterPolicy
+metadata:
+  name: nic-cluster-policy
+spec:
+  rdmaSharedDevicePlugin:
+    configList:
+    - resourceName: rdma_shared_devices_a
+      rdmaHcaMax: 1000
+      netDevices: ["mlx5_1", "mlx5_7"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rdma-pod
+spec:
+  containers:
+  - name: rdma-container
+    image: mellanox/rdma-test
+    resources:
+      limits:
+        mellanox.com/sriov_rdma: 1
+        mellanox.com/rdma_shared_devices_a: 1
+    securityContext:
+      capabilities:
+        add: ["IPC_LOCK"]

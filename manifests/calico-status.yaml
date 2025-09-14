@@ -1,0 +1,10 @@
+apiVersion: projectcalico.org/v3
+kind: CalicoNodeStatus
+metadata:
+  name: caliconodestatus-54122
+spec:
+  classes:
+    - Agent
+    - Routes
+  node: nl54122
+  updatePeriodSeconds: 10

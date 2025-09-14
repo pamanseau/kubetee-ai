@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-3
+spec:
+  containers:
+  - name: ubuntu
+    image: ubuntu:jammy
+    command:
+      - sleep
+      - "infinity"
+    imagePullPolicy: IfNotPresent
+    envFrom: []
+    volumeMounts:
+    # - name: ubuntu-data-old
+    #   mountPath: /data-old    
+    - name: ubuntu-data-volume
+      mountPath: /data   
+  nodeSelector: 
+    kubernetes.io/hostname: 56778.example.com
+  volumes: 
+  # - name: ubuntu-data-old
+  #   persistentVolumeClaim:
+  #     claimName: old-storage-prysm-0
+  - name: ubuntu-data-volume
+    persistentVolumeClaim:
+      claimName: storage-prysm-0
