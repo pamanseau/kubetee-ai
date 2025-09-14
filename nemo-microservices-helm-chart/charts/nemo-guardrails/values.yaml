@@ -187,6 +187,11 @@ postgresql:
     database: nemo-guardrails
     # -- The name of an existing secret to use for PostgreSQL credentials.
     existingSecret: ""
+postgresWaitImage:
+  # -- The repository location of the image used to wait for postgres to start.
+  repository: "busybox"
+  # -- The tag of the image used when waiting.
+  tag: "latest"
 
 # -- External PostgreSQL configuration.
 externalDatabase:

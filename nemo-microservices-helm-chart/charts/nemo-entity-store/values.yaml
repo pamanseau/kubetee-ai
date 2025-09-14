@@ -22,8 +22,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 # -- Additional environment variables to pass to the NeMo Entity Store container. Format should be `NAME: value` or `NAME: valueFrom: {object}`.
-env:
-  {}
+env: {}
 
 serviceAccount:
   # -- Whether to automatically mount the service account's API credentials.
@@ -105,7 +104,8 @@ readinessProbe:
   failureThreshold: 20
 
 # -- Requests and limits for underlying Kubernetes deployment for NeMo Entity Store.
-resources: {}
+resources:
+  {}
   # If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
@@ -160,6 +160,11 @@ postgresql:
     existingSecret: ""
   # -- The PostgreSQL architecture. Available options are `standalone` or `replication`.
   architecture: standalone
+postgresWaitImage:
+  # -- The repository location of the image used to wait for postgres to start.
+  repository: "busybox"
+  # -- The tag of the image used when waiting.
+  tag: "latest"
 
 externalDatabase:
   # -- The database host.

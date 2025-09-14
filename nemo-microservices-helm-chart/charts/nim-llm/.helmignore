@@ -23,7 +23,7 @@
 .vscode/
 # test files
 test-values.yaml
-multinode-test-values.yaml
+multinode-test-values*.yaml
 test-values-demo.yaml
 # example file
 examples/

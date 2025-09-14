@@ -1,6 +1,8 @@
 tags:
   # -- When set to `true`, installs all NeMo microservices. To install individual microservices, set `platform` to `false` and configure the `tags` key with values for each individual microservice. For more information, refer to [Tag-Based Installation](https://docs.nvidia.com/nemo/microservices/latest/set-up/deployment-options.html#tag-based-installation).
   platform: true
+  # -- Specifies whether to install the NeMo Auditor microservice.
+  auditor: false
 
 # The chart generates top-level secrets (custom-values.yaml overrides these)
 
@@ -618,9 +620,9 @@ data-store:
   # -- External URL configuration for the NeMo Data Store microservice.
   external:
     # -- The external URL where users will access the NeMo Data Store microservice.
-    rootUrl: ""
+    rootUrl: http://data-store.test
     # -- The external URL's domain name.
-    domain: ""
+    domain: data-store.test
 
   # -- External PostgreSQL configuration settings. These values are only used when postgresql.enabled is set to false.
   # @default -- This object has the following default values for the external PostgreSQL configuration.
@@ -678,6 +680,16 @@ customizer:
     registry: nvcr.io
     # -- Repository for the NeMo Customizer image.
     repository: nvidia/nemo-microservices/customizer
+    # -- Image pull policy for the NeMo Customizer image.
+    imagePullPolicy: IfNotPresent
+
+  # -- NeMo Customizer image that supports training ONLY for gpt-oss model
+  # @default -- This object has the following default values for the NeMo Customizer microservice image.
+  gptOssImage:
+    # -- Registry for the NeMo Customizer image.
+    registry: nvcr.io
+    # -- Repository for the NeMo Customizer image.
+    repository: nvidia/nemo-microservices/customizer-gpt-oss
     # -- Image pull policy for the NeMo Customizer image.
     imagePullPolicy: IfNotPresent
 
@@ -1054,8 +1066,6 @@ customizer:
   awsDeploy:
     # -- Switch on if using AWS and kyverno is installed
     enabled: false
-    # -- This deployment expects a homogoneous cluster, this is the number of GPUs per node. Multinode training will only occur when the whole node is reserved
-    gpusPerNode: 8
     # -- EFA number of devices per GPU
     efaDevicesPerGPU: 4
   # -- List of model configurations supported by the Customizer.
@@ -1089,7 +1099,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/llama-3_2-1b:2.0
         # -- Path where model files are stored.
         model_path: llama32_1b_2_0
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: meta/llama-3.2-1b
         # -- Number of model parameters.
         num_parameters: 1000000000
@@ -1109,7 +1119,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/llama-3_2-1b-instruct:2.0
         # -- Path where model files are stored.
         model_path: llama32_1b-instruct_2_0
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: meta/llama-3.2-1b-instruct
         # -- Number of model parameters.
         num_parameters: 1000000000
@@ -1129,7 +1139,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/llama-3_2-3b-instruct:2.0
         # -- Path where model files are stored.
         model_path: llama32_3b-instruct_2_0
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: meta/llama-3.2-3b-instruct
         # -- Number of model parameters.
         num_parameters: 3000000000
@@ -1149,7 +1159,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/llama-3-70b-instruct-nemo:2.0
         # -- Path where model files are stored.
         model_path: llama-3-70b-bf16_2_0
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: meta/llama3-70b-instruct
         # -- Number of model parameters.
         num_parameters: 70000000000
@@ -1169,7 +1179,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/llama-3_1-8b-instruct-nemo:2.0
         # -- Path where model files are stored.
         model_path: llama-3_1-8b-instruct_2_0
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: meta/llama-3.1-8b-instruct
         # -- Number of model parameters.
         num_parameters: 8000000000
@@ -1189,7 +1199,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/llama-3_1-70b-instruct-nemo:2.0
         # -- Path where model files are stored.
         model_path: llama-3_1-70b-instruct_2_0
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: meta/llama-3.1-70b-instruct
         # -- Number of model parameters.
         num_parameters: 70000000000
@@ -1211,7 +1221,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/phi-4:1.0
         # -- Path where model files are stored.
         model_path: phi-4_1_0
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: microsoft/phi-4
         # -- Number of model parameters.
         num_parameters: 14659507200
@@ -1231,7 +1241,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/llama-3_3-70b-instruct:2.0
         # -- Path where model files are stored.
         model_path: llama-3_3-70b-instruct_2_0
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: meta/llama-3.3-70b-instruct
         # -- Number of model parameters.
         num_parameters: 70000000000
@@ -1251,7 +1261,7 @@ customizer:
         model_uri: ngc://nvidia/nemo/nemotron-nano-3_1-8b:0.0.1
         # -- Path where model files are stored.
         model_path: nemotron-nano-3_1-8b_0_0_1
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: nvidia/nemotron-nano-llama-3.1-8b
         # -- Number of model parameters.
         num_parameters: 8000000000
@@ -1271,10 +1281,32 @@ customizer:
         model_uri: ngc://nvidia/nemo/nemotron-super-3_3-49b:v1
         # -- Path where model files are stored.
         model_path: nemotron-super-3_3-49b_v1
-        # -- Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name.
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
         base_model: nvidia/nemotron-super-llama-3.3-49b
         # -- Number of model parameters.
-        num_parameters: 8000000000
+        num_parameters: 4900000000
+        # -- Model precision format.
+        precision: bf16-mixed
+
+      # -- Nemotron Super Llama 3.3 49B v1.5 Instruct model target configuration.
+      # @default -- This object has the following default values for the Nemotron Super Llama 3.3 49B v1.5 Instruct model.
+      nvidia/nemotron-super-llama-3.3-49b@1.5:
+        # -- The name for target model.
+        name: nemotron-super-llama-3.3-49b@1.5
+        # -- The namespace for target model.
+        namespace: nvidia
+        # -- Whether to enable the model.
+        enabled: false
+        # -- NGC model URI
+        model_uri: hf://nvidia/Llama-3_3-Nemotron-Super-49B-v1_5
+        # -- Endpoint for where to find this model
+        hf_endpoint: https://huggingface.co
+        # -- Path where model files are stored.
+        model_path: nemotron-super-3_3-49b_v1_5
+        # -- Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name.
+        base_model: nvidia/nemotron-super-llama-3.3-49b-v1.5
+        # -- Number of model parameters.
+        num_parameters: 4900000000
         # -- Model precision format.
         precision: bf16-mixed
 
@@ -1295,6 +1327,28 @@ customizer:
         base_model: nvidia/llama-3.2-nv-embedqa-1b-v2
         # -- Number of model parameters.
         num_parameters: 1000000000
+        # -- Model precision format.
+        precision: bf16-mixed
+
+      # -- openai/gpt-oss-20b target model configuration.
+      # @default -- This object has the following default values for the openai/gpt-oss-20b model.
+      openai/gpt-oss-20b@v1:
+        # -- The name for target model.
+        name: gpt-oss-20b@v1
+        # -- The namespace for target model.
+        namespace: openai
+        # -- Whether to enable the model.
+        enabled: false
+        # -- HF model URI
+        model_uri: hf://openai/gpt-oss-20b
+        # -- HF endpoint
+        hf_endpoint: https://huggingface.co
+        # -- Path where model files are stored.
+        model_path: gpt_oss_20b-embedding
+        # -- Mapping to the model name to the optimized llama embedding training script and NIM
+        base_model: openai/gpt-oss-20b
+        # -- Number of model parameters.
+        num_parameters: 21000000000
         # -- Model precision format.
         precision: bf16-mixed
 
@@ -1679,6 +1733,35 @@ customizer:
         # -- Prompt template used to extract keys from the dataset.
         prompt_template: "{prompt} {completion}"
 
+      # -- Nemotron Super Llama 3.3 49B v1.5 Instruct model configuration.
+      # @default -- This object has the following default values for the Nemotron Super Llama 3.3 49B v1.5 Instruct model.
+      nvidia/nemotron-super-llama-3.3-49b@v1.5+A100:
+        # -- The name for training config template.
+        name: nemotron-super-llama-3.3-49b@v1.5+A100
+        # -- The namespace for training config template.
+        namespace: nvidia
+        # -- The target to perform the customization on.
+        target: nvidia/nemotron-super-llama-3.3-49b@1.5
+        # -- Resource configuration for each training option for the target model.
+        training_options:
+          # -- Training method.
+          - training_type: sft
+            # -- The type of fine-tuning method.
+            finetuning_type: lora
+            # -- The number of GPUs per node to use for the specified training.
+            num_gpus: 4
+            # -- The number of nodes to use for the specified training.
+            num_nodes: 1
+            # -- The number of GPUs among which the model’s tensors are partitioned.
+            tensor_parallel_size: 4
+            # -- The number of training examples processed in parallel by each individual GPU.
+            micro_batch_size: 1
+        # -- The largest context used for training. Datasets are truncated based on the maximum sequence length.
+        max_seq_length: 4096
+        # -- Prompt template used to extract keys from the dataset.
+        prompt_template: "{prompt} {completion}"
+
+
       #### ------------------------------ Nvidia L40 GPU default configurations ------------------------------ ####
       # -- Llama 3.2 1B model configuration.
       # @default -- This object has the following default values for the Llama 3.2 1B model.
@@ -2062,6 +2145,38 @@ customizer:
         # -- Prompt template used to extract keys from the dataset.
         prompt_template: "{prompt} {completion}"
 
+      # -- Openai gpt-oss 20B model configuration.
+      # @default -- This object has the following default values for the OpenAI gpt-oss 20b model.
+      openai/gpt-oss-20b@v1.0.0+A100:
+        # -- The name for training config template.
+        name: gpt-oss-20b@v1.0.0+A100
+        # -- The namespace for training config template.
+        namespace: openai
+        # -- The target to perform the customization on.
+        target: openai/gpt-oss-20b@v1
+        # -- Resource configuration for each training option for the target model.
+        training_options:
+          # -- Training method.
+          - training_type: sft
+            # -- The type of fine-tuning method.
+            finetuning_type: all_weights
+            # -- The number of GPUs per node to use for the specified training.
+            num_gpus: 8
+            # -- The number of nodes to use for the specified training.
+            num_nodes: 1
+            # -- The number of GPUs among which the model’s tensors are partitioned.
+            tensor_parallel_size: 1
+            # -- Number of GPUs used to split the model across layers for pipeline model.
+            pipeline_parallel_size: 2
+            # -- Number of GPUs used to parallelize expert (MoE) components of the model.
+            expert_model_parallel_size: 4
+            # -- The number of training examples processed in parallel by each individual GPU.
+            micro_batch_size: 1
+        # -- The largest context used for training. Datasets are truncated based on the maximum sequence length.
+        max_seq_length: 2048
+        # -- Prompt template used to extract keys from the dataset.
+        prompt_template: "{prompt} {completion}"
+
   # -- Sets predictable name for the NeMo Customizer Kubernetes service
   serviceName: nemo-customizer
 
@@ -2072,7 +2187,7 @@ nim:
   image:
     # Adjust to the actual location of the image and version you want
     repository: nvcr.io/nim/meta/llama-3.1-8b-instruct
-    tag: "1.8.3"
+    tag: "1.8"
   imagePullSecrets:
     - name: nvcrimagepullsecret
   model:
@@ -2181,19 +2296,24 @@ evaluator:
       # -- Time-to-live after completion for the core eval jobs.
       ttlSecondsAfterFinished: 172800
 
+  # -- Optional override for evaluation images.
   evaluationImages:
-    # -- The image for the bigcode evaluation harness evaluation.
-    bigcodeEvalHarness: "nvcr.io/nvidia/eval-factory/bigcode-evaluation-harness:25.06.2"
-    # -- The image for the language model evaluation harness evaluation.
-    lmEvalHarness: "nvcr.io/nvidia/eval-factory/lm-evaluation-harness:25.06.2"
-    # -- The image for the retriever evaluation.
-    retriever: "nvcr.io/nvidia/eval-factory/rag_retriever_eval:25.06.2"
-    # -- The image for the RAG evaluation.
-    rag: "nvcr.io/nvidia/eval-factory/rag_retriever_eval:25.06.2"
-    # -- The image for the BFCL evaluation.
-    bfcl: "nvcr.io/nvidia/eval-factory/bfcl:25.06.2"
-    # -- The image for the Agentic evaluation.
-    agenticEval: "nvcr.io/nvidia/eval-factory/agentic_eval:25.06.2"
+    # -- The image for the bigcode evaluation harness evaluation: nvcr.io/nvidia/eval-factory/bigcode-evaluation-harness
+    BIGCODE_EVALUATION_HARNESS: ""
+    # -- The image for the language model evaluation harness evaluation: nvcr.io/nvidia/eval-factory/lm-evaluation-harness
+    LM_EVAL_HARNESS: ""
+    # -- The image for the retriever evaluation: nvcr.io/nvidia/eval-factory/rag_retriever_eval
+    RETRIEVER: ""
+    # -- The image for the RAG evaluation: nvcr.io/nvidia/eval-factory/rag_retriever_eval
+    RAG: ""
+    # -- The image for the BFCL evaluation: nvcr.io/nvidia/eval-factory/bfcl
+    BFCL: ""
+    # -- The image for the Agentic evaluation: nvcr.io/nvidia/eval-factory/agentic_eval
+    AGENTIC_EVAL: ""
+    # -- The image for the model safety evaluation: nvcr.io/nvidia/eval-factory/safety-harness
+    SAFETY_HARNESS: ""
+    # -- The image for the Simple-Evals evaluation: nvcr.io/nvidia/eval-factory/simple-evals
+    SIMPLE_EVALS: ""
 
   ingress:
     # -- Whether to enable the ingress for the NeMo Evaluator service.
@@ -2329,6 +2449,12 @@ evaluator:
     serviceAccount:
       # -- The name of the service account for PostgreSQL.
       name: evaluator-postgresql
+
+  postgresWaitImage:
+    # -- The repository location of the image used to wait for postgres to start.
+    repository: "busybox"
+    # -- The tag of the image used when waiting.
+    tag: "latest"
 
   externalDatabase:
     # -- The host for an external database.
@@ -2517,6 +2643,7 @@ guardrails:
     DEFAULT_LLM_PROVIDER: "nim"
     NEMO_GUARDRAILS_SERVER_ENABLE_CORS: "False"
     NEMO_GUARDRAILS_SERVER_ALLOWED_ORIGINS: "*"
+    FETCH_NIM_APP_MODELS: "True"
     GUARDRAILS_HOST: "0.0.0.0"
     GUARDRAILS_PORT: "7331"
 
@@ -2665,6 +2792,12 @@ guardrails:
       # -- The name of an existing secret to use for PostgreSQL credentials.
       existingSecret: ""
 
+  postgresWaitImage:
+    # -- The repository location of the image used to wait for postgres to start.
+    repository: "busybox"
+    # -- The tag of the image used when waiting.
+    tag: "latest"
+
   # -- External PostgreSQL configuration.
   externalDatabase:
     # -- The database host.
@@ -2697,8 +2830,8 @@ guardrails:
   serviceName: nemo-guardrails
 
 nemo-operator:
-  # -- Namespace to restrict the NeMo Operator microservice to watch resources in. Leave it empty to watch all namespaces.
-  restrictedNamespace: ""
+  # -- Whether to watch all namespaces, default is to restrict the NeMo Operator microservice to watch resources in the NMP deployment namespace.
+  watchAllNamespaces: false
 
   # -- Additional environment variables to pass to controller manager. The format is `NAME: value` or `NAME: valueFrom: {object}`.
   env:
@@ -2797,29 +2930,6 @@ nim-operator:
     nodeFeatureRules:
       # -- Specifies whether to enable device ID feature rules.
       deviceID: false
-
-dgxc-admission-controller:
-  # -- Specifies whether to install the DGX Cloud Admission Controller.
-  enabled: false
-  kubernetesAffinity:
-    # -- Specifies whether to enable Kubernetes affinity.
-    enabled: false
-  enableDGXCRbac: false
-  # -- Specifies whether to enable network policies.
-  enableNetworkPolicies: false
-  # -- Specifies whether to enable integrations support.
-  enableIntegrationsSupport: false
-  # -- Specifies whether to enable the labeler.
-  enableLabeler: false
-  # -- The image pull secret for the DGX Cloud Admission Controller.
-  imagePullSecret: nvcrimagepullsecret
-  dgxcController:
-    # -- The image for the DGX Cloud Admission Controller.
-    image: "nvcr.io/nvidia/nemo-microservices/dgxc-admission-controller:1.801.0"
-  cloudProviderSpec:
-    # -- The type of the dummy cloud provider.
-    dummy:
-      type: dummy
 
 entity-store:
   # -- The number of NeMo Entity Store replicas to deploy.
@@ -2991,6 +3101,12 @@ entity-store:
       existingSecret: ""
     # -- The PostgreSQL architecture. Available options are `standalone` or `replication`.
     architecture: standalone
+
+  postgresWaitImage:
+    # -- The repository location of the image used to wait for postgres to start.
+    repository: "busybox"
+    # -- The tag of the image used when waiting.
+    tag: "latest"
 
   externalDatabase:
     # -- The database host.
@@ -3176,6 +3292,7 @@ deployment-management:
   # -- Properties to configure NIM deployments for the NeMo Deployment Management microservice.
   deployments:
     # -- The default storage class for NIM deployments.
+    # -- Storage classes utilizing NFSv3+ may encounter issues with huggingface-cli file locking.
     defaultStorageClass: ""
     # -- The URL for PEFT model sources (typically points to NeMo Entity Store)
     nimPeftSource: http://nemo-entity-store:8000
@@ -3187,7 +3304,7 @@ deployment-management:
       # -- Whether to enable metrics collection for the NIM deployments.
       enabled: false
     # -- The size of the PVC for the NIM deployments.
-    nimPvcSize: 25Gi
+    nimPvcSize: 200Gi
     # -- The image to use for pulling models from NeMo Data Store. Must have the huggingface-cli binary installed.
     modelPullerImage: nvcr.io/nvidia/nemo-microservices/nds-v2-huggingface-cli:25.06
     # -- The pull secret used to pull the model puller image.
@@ -3376,7 +3493,7 @@ nim-proxy:
 
 ingress:
   # -- Specifies whether to enable the ingress.
-  enabled: false
+  enabled: true
   # -- Annotations for the ingress resource.
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 50g
@@ -3428,6 +3545,10 @@ ingress:
           pathType: Prefix
           service: nemo-deployment-management
           port: 8000
+        - path: /v1beta1/audit
+          pathType: Prefix
+          service: nemo-auditor
+          port: 5000
     nimProxy:
       # -- The host name for the second ingress host for the NIM Proxy microservice.
       name: nim.test
@@ -3547,6 +3668,19 @@ virtualService:
               host: nemo-guardrails
               port:
                 number: 7331
+      auditor:
+        # -- The CORS policy for the virtual NeMo Auditor service.
+        corsPolicy: {}
+        # -- The match for the virtual NeMo Auditor service.
+        match:
+          - uri:
+              prefix: /v1beta1/audit
+        # -- The route for the virtual NeMo Auditor service.
+        route:
+          - destination:
+              host: nemo-auditor
+              port:
+                number: 5000
   additional:
     # -- Additional virtual service configurations.
     data-store:
@@ -3590,6 +3724,154 @@ virtualService:
                   number: 8000
 auditor:
   # -- Specifies whether to install the NeMo Auditor microservice.
-  enabled: false
   serviceName: nemo-auditor
 
+  # -- Number of replicas for the Auditor deployment.
+  replicaCount: 1
+
+  # -- Container image configuration.
+  image:
+    repository: nvcr.io/nvidia/nemo-microservices/auditor
+    pullPolicy: IfNotPresent
+    tag: ""
+
+  # -- Service account configuration.
+  serviceAccount:
+    # -- Specifies whether a service account should be created.
+    create: true
+    # -- Automatically mount a ServiceAccount's API credentials.
+    automount: true
+    # -- Annotations to add to the service account.
+    annotations: {}
+    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template.
+    name: ""
+
+  # -- Annotations to add to pods.
+  podAnnotations: {}
+  # -- Labels to add to pods.
+  podLabels: {}
+
+  # -- Security context for the pod.
+  podSecurityContext:
+    fsGroup: 1000
+
+  # -- Security context for the container.
+  securityContext: {}
+
+  # -- Service configuration.
+  service:
+    type: ClusterIP
+    port: 5000
+
+  # -- Istio virtual service configuration.
+  virtualService:
+    enabled: false
+    dnsName: auditor.example.local
+    gateway: istio-system/ingress-gateway
+    apiPath: /v1beta1/audit
+    annotations: {}
+
+  # -- Ingress configuration.
+  ingress:
+    enabled: false
+    className: "nginx"
+    annotations: {}
+    hosts: {}
+    tls: []
+
+  # -- Resource requests and limits.
+  resources: {}
+
+  # -- Liveness probe configuration.
+  livenessProbe:
+    httpGet:
+      path: /health/live
+      port: http
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 600
+    failureThreshold: 100
+
+  # -- Readiness probe configuration.
+  readinessProbe:
+    httpGet:
+      path: /health/ready
+      port: http
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 600
+    failureThreshold: 100
+
+  # -- Autoscaling configuration.
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 80
+
+  # -- Environment variables to pass to containers. This is an object formatted like NAME: value or NAME: valueFrom: {object}
+  env: {}
+
+  # -- Node selector for pod assignment.
+  nodeSelector: {}
+
+  # -- Affinity rules for pod assignment.
+  affinity: {}
+
+  # -- Tolerations for pod assignment.
+  tolerations: []
+
+  # -- Additional volumes on the output Deployment definition.
+  volumes: []
+
+  # -- Additional volume mounts on the output Deployment definition.
+  volumeMounts: []
+
+  # -- Name of secret with authenitcation key for build.nvidia.com, if used. This must have a key of NIM_API_KEY and with the actual key as the value.
+  auditorApiKeysSecretName: ""
+
+  # -- PostgreSQL configuration for the NeMo Auditor microservice.
+  postgresql:
+    # -- Whether to install the default PostgreSQL Helm chart. If enabled, the NeMo Auditor microservice Helm chart uses the [PostgreSQL Helm chart from Bitnami](https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml) to create a PostgreSQL database.
+    enabled: true
+    # -- The name override for the Auditor PostgreSQL database.
+    nameOverride: auditdb
+    # -- The architecture for the default PostgreSQL service.
+    architecture: standalone
+    serviceAccount:
+      # -- The name of the service account for PostgreSQL.
+      name: auditor-postgresql
+      # -- Specifies whether to create a new service account for PostgreSQL.
+      create: true
+    auth:
+      # -- Whether to assign a password to the "postgres" admin user. If disabled, remote access is blocked for this user.
+      enablePostgresUser: true
+      # -- The user name to use for the PostgreSQL database.
+      username: nemo
+      # -- The password for the PostgreSQL user.
+      password: nemo
+      # -- The name for a custom database to create.
+      database: auditor
+      # -- The name of an existing secret to use for PostgreSQL credentials.
+      existingSecret: ""
+    service:
+      ports:
+        postgresql: 5432
+    persistence:
+      enabled: true
+      size: 10Gi
+
+  # -- External PostgreSQL configuration.
+  externalDatabase:
+    # -- The database host.
+    host: ""
+    # -- The database port.
+    port: 5432
+    # -- The database user.
+    user: nemo
+    # -- The database name.
+    database: auditor
+    # -- The name of an existing secret to use for PostgreSQL credentials.
+    existingSecret: ""
+    # -- The name of an existing secret key to use for PostgreSQL credentials.
+    existingSecretPasswordKey: ""

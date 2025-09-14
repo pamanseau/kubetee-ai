@@ -77,7 +77,7 @@ dependencies:
   condition: nim.enabled
   name: nim-llm
   repository: https://helm.ngc.nvidia.com/nvidian/nemo-llm
-  version: 1.7.0-rc1
+  version: 1.13.1
 - alias: nim-operator
   condition: nim-operator.enabled
   name: k8s-nim-operator
@@ -86,10 +86,6 @@ dependencies:
   - platform
   - guardrails
   version: ~2.0.1
-- condition: dgxc-admission-controller.enabled
-  name: dgxc-admission-controller
-  repository: https://helm.ngc.nvidia.com/nvidian/nemo-llm
-  version: '>=1.801.0'
 - condition: volcano.enabled
   name: volcano
   repository: https://volcano-sh.github.io/helm-charts
@@ -101,4 +97,4 @@ maintainers:
   url: https://www.nvidia.com
 name: nemo-microservices-helm-chart
 type: application
-version: 25.8.0
+version: 25.9.0

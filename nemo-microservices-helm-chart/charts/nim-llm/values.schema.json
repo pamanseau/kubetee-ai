@@ -4,7 +4,7 @@
     "properties": {
         "customCommand": {
             "type": "array",
-            "description": "Overrides command line options sent to the NIM with the array listed here. ",
+            "description": "Overrides command line options sent to the NIM with the array listed here.",
             "default": "[]",
             "items": {
                 "type": "string"
@@ -12,7 +12,7 @@
         },
         "customArgs": {
             "type": "array",
-            "description": "Overrides command line arguments of the NIM container with the array listed here. ",
+            "description": "Overrides command line arguments of the NIM container with the array listed here.",
             "default": "[]",
             "items": {
                 "type": "string"
@@ -59,11 +59,6 @@
                 }
             }
         },
-        "healthPort": {
-            "type": "number",
-            "description": "Specifies health check port. -- for use with `models.legacyCompat` only since current NIMs have no separate port.",
-            "default": 8000
-        },
         "podSecurityContext": {
             "type": "object",
             "properties": {
@@ -81,6 +76,28 @@
                     "type": "number",
                     "description": "Specify file system owner group id.",
                     "default": 1000
+                }
+            }
+        },
+        "proxyCA": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Specify true if NIM is run behind a proxy.",
+                    "default": false
+                },
+                "secretName": {
+                    "type": "string",
+                    "description": "Specify a name of the Kubernetes secret containing the certificate. The secret is created before the deployment. Must be used together with `proxyCA.keyName`",
+                    "default": "",
+                    "nullable": true
+                },
+                "keyName": {
+                    "type": "string",
+                    "description": "Specify a name of the key inside the secret which contains the certificate. Must be used together with `proxyCA.secretName`",
+                    "default": "",
+                    "nullable": true
                 }
             }
         },
@@ -170,13 +187,13 @@
                             },
                             "paths": {
                                 "type": "array",
-                                "description": "Specify ingress path. ",
+                                "description": "Specify ingress path.",
                                 "items": {
                                     "type": "object",
                                     "properties": {
                                         "path": {
                                             "type": "string",
-                                            "description": "Specify ingress path. "
+                                            "description": "Specify ingress path."
                                         },
                                         "pathType": {
                                             "type": "string",
@@ -338,11 +355,6 @@
         "metrics": {
             "type": "object",
             "properties": {
-                "enabled": {
-                    "type": "boolean",
-                    "description": "Enables metrics endpoint -- for `legacyCompat` only since current NIMs serve metrics on the OpenAI API port.",
-                    "default": true
-                },
                 "serviceMonitor": {
                     "type": "object",
                     "properties": {
@@ -365,7 +377,7 @@
                 },
                 "name": {
                     "type": "string",
-                    "description": "Specifies the name of the model in the API (usually, the name of the NIM). This is mostly used for helm tests and is usually otherwise optional. This must match the name from _/v1/models_ to allow `helm test <release-name>` to work. In `legacyCompat`, this is required and sets the name of the model in /v1/models.",
+                    "description": "Specifies the name of the model in the API (usually, the name of the NIM). This is mostly used for helm tests and is usually otherwise optional. This must match the name from _/v1/models_ to allow `helm test <release-name>` to work.",
                     "default": "meta/llama3-8b-instruct"
                 },
                 "ngcAPISecret": {
@@ -376,6 +388,11 @@
                 "ngcAPIKey": {
                     "type": "string",
                     "description": "NGC API key literal to use as the API secret and image pull secret when set.",
+                    "default": "\"\""
+                },
+                "hfTokenSecret": {
+                    "type": "string",
+                    "description": "Name of pre-existing secret with a key named `HF_TOKEN` that contains a token for HuggingFace model downloads.",
                     "default": "\"\""
                 },
                 "openaiPort": {
@@ -392,26 +409,6 @@
                     "type": "string",
                     "description": "Log level of NIM service. Possible values of the variable are TRACE, DEBUG, INFO, WARNING, ERROR, CRITICAL.",
                     "default": "INFO"
-                },
-                "legacyCompat": {
-                    "type": "boolean",
-                    "description": "Set `true` to enable compatibility with pre-release NIM versions prior to 1.0.0.",
-                    "default": false
-                },
-                "numGpus": {
-                    "type": "number",
-                    "description": "(deprecated) Specify GPU requirements for the model.",
-                    "default": 1
-                },
-                "subPath": {
-                    "type": "string",
-                    "description": "(deprecated) Specify path within the model volume to mount if not the root -- default works with `ngcInit` and persistent volume. (`legacyCompat` only)",
-                    "default": "model-store"
-                },
-                "modelStorePath": {
-                    "type": "string",
-                    "description": "(deprecated) Specify location of unpacked model.",
-                    "default": ""
                 }
             }
         },
@@ -471,7 +468,7 @@
                 },
                 "path": {
                     "type": "string",
-                    "description": "Specifies path on the node used as a `hostPath` volume. ",
+                    "description": "Specifies path on the node used as a `hostPath` volume.",
                     "default": "/model-store"
                 }
             }
@@ -531,17 +528,17 @@
             "properties": {
                 "enabled": {
                     "type": "boolean",
-                    "description": "Enables multi-node deployments.",
+                    "description": "Specify true for multi-node deployments.",
                     "default": false
                 },
                 "clusterStartTimeout": {
                     "type": "number",
-                    "description": "Sets the number of seconds to wait for worker nodes to come up before failing.",
+                    "description": "Set the number of seconds to wait for worker nodes to start before failing.",
                     "default": 300
                 },
                 "gpusPerNode": {
                     "type": "number",
-                    "description": "Number of GPUs that will be presented to each pod. In most cases, this should match `resources.limits.nvidia.com/gpu`.",
+                    "description": "Number of GPUs for each pod. In most cases, this should match `resources.limits.nvidia.com/gpu`.",
                     "default": 1
                 },
                 "workers": {
@@ -560,7 +557,7 @@
                     "properties": {
                         "enabled": {
                             "type": "boolean",
-                            "description": "NVIDIA recommends you use `LeaderWorkerSets` to deploy. If disabled, defaults to using `MPIJob` from mpi-operator.",
+                            "description": "True to use `LeaderWorkerSets` for multi-node deployments (recommended). False to `MPIJob` from mpi-operator.",
                             "default": true
                         }
                     }
@@ -591,7 +588,7 @@
                     "properties": {
                         "enabled": {
                             "type": "boolean",
-                            "description": "Enables optimized multi-node deployments (currently the only option supported).",
+                            "description": "True to enable optimized multi-node deployments. Currently, true is the only option.",
                             "default": true
                         }
                     }

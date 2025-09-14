@@ -55,6 +55,13 @@ spec:
                   secretKeyRef:
                     name: {{ .Values.model.ngcAPISecret }}
                     key: NGC_API_KEY
+              {{- if .Values.model.hfTokenSecret }}
+              - name: HF_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.model.hfTokenSecret }}
+                    key: HF_TOKEN
+              {{- end }}
               - name: NIM_SERVER_PORT
                 value: {{ .Values.model.openaiPort | quote }}
               - name: NIM_JSONL_LOGGING
@@ -77,7 +84,11 @@ spec:
               - name: GROUP_INDEX
                 valueFrom:
                   fieldRef:
-                    fieldPath: metadata.labels['leaderworkerset.sigs.k8s.io/group-index']       
+                    fieldPath: metadata.labels['leaderworkerset.sigs.k8s.io/group-index']
+              {{- if .Values.proxyCA.enabled }}
+              - name: SSL_CERT_FILE
+                value: /opt/nim/proxy-ca
+              {{- end }}
             ports:
               {{- include "nim-llm.ports" . | nindent 14 }}
             resources:
@@ -122,6 +133,11 @@ spec:
               defaultMode: 0555
           - name: ssh-dotfiles
             emptyDir: {}
+          {{- if .Values.proxyCA.enabled }}
+          - name: proxy-ca
+            secret:
+              secretName: {{ .Values.proxyCA.secretName }}
+          {{- end }}
           - name: ssh-pk
             secret:
               defaultMode: 256
@@ -179,6 +195,13 @@ spec:
                   secretKeyRef:
                     name: {{ .Values.model.ngcAPISecret }}
                     key: NGC_API_KEY
+              {{- if .Values.model.hfTokenSecret }}
+              - name: HF_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.model.hfTokenSecret }}
+                    key: HF_TOKEN
+              {{- end }}
               - name: NIM_SERVER_PORT
                 value: {{ .Values.model.openaiPort | quote }}
               - name: NIM_JSONL_LOGGING
@@ -203,6 +226,10 @@ spec:
                 valueFrom:
                   fieldRef:
                     fieldPath: metadata.labels['leaderworkerset.sigs.k8s.io/name']
+              {{- if .Values.proxyCA.enabled }}
+              - name: SSL_CERT_FILE
+                value: /opt/nim/proxy-ca
+              {{- end }}
         {{- with .Values.nodeSelector }}
         nodeSelector:
           {{- toYaml . | nindent 10 }}
@@ -237,6 +264,11 @@ spec:
             configMap:
               name: {{ include "nim-llm.fullname" . }}-mpi-start-script
               defaultMode: 0555
+          {{- if .Values.proxyCA.enabled }}
+          - name: proxy-ca
+            secret:
+              secretName: {{ .Values.proxyCA.secretName }}
+          {{- end }}
 {{- else }}
 {{ if .Values.multiNode.optimized.enabled }}
 {{- /*
@@ -258,8 +290,12 @@ spec:
       replicas: 1
       template:
         metadata:
+          labels:
+            {{- include "nim-llm.labels" $ | nindent 12 }}
+          {{- if $.Values.podAnnotations }}
           annotations:
             {{- toYaml $.Values.podAnnotations | nindent 12 }}
+          {{- end }}
         spec:
           {{- with $.Values.imagePullSecrets }}
           imagePullSecrets:
@@ -276,10 +312,10 @@ spec:
           {{- end }}
           containers:
           - image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
-            {{- if .Values.customCommand }}
+            {{- if $.Values.customCommand }}
             command:
-              {{- range .Values.customCommand }}
-              - {{ . | quote }}
+              {{- range $.Values.customCommand }}
+              - {{ $ | quote }}
               {{- end }}
             {{- end }}
             name: nim
@@ -302,6 +338,13 @@ spec:
                   secretKeyRef:
                     name: {{ $.Values.model.ngcAPISecret }}
                     key: NGC_API_KEY
+              {{- if $.Values.model.hfTokenSecret }}
+              - name: HF_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ $.Values.model.hfTokenSecret }}
+                    key: HF_TOKEN
+              {{- end }}
               - name: NIM_SERVER_PORT
                 value: {{ $.Values.model.openaiPort | quote }}
               - name: NIM_JSONL_LOGGING
@@ -310,6 +353,10 @@ spec:
                 value: {{ $.Values.model.logLevel | quote }}
               - name: NIM_NUM_COMPUTE_NODES
                 value: {{ $.Values.multiNode.workers | quote }}
+              {{- if $.Values.proxyCA.enabled }}
+              - name: SSL_CERT_FILE
+                value: /opt/nim/proxy-ca
+              {{- end }}
               {{- if $.Values.env }}
               {{- toYaml $.Values.env | nindent 14 }}
               {{- end }}
@@ -332,20 +379,29 @@ spec:
               configMap:
                 name: {{ include "nim-llm.fullname" $ }}-mpi-start-script
                 defaultMode: 0555
+            {{- if $.Values.proxyCA.enabled }}
+            - name: proxy-ca
+              secret:
+                secretName: {{ $.Values.proxyCA.secretName }}
+            {{- end }}
     Worker:
       replicas: {{ $.Values.multiNode.workers }}
       template:
         metadata:
           labels:
-            {{- include "nim-llm.selectorLabels" $ | nindent 12 }}
+            {{- include "nim-llm.labels" $ | nindent 12 }}
             {{- if $.Values.model.labels }}
             {{- toYaml $.Values.model.labels | nindent 12 }}
             {{- end }}
+          {{- if (or $.Values.podAnnotations $.Values.multiNode.mpiJob.workerAnnotations) }}
           annotations:
+            {{- if $.Values.podAnnotations }}
             {{- toYaml $.Values.podAnnotations | nindent 12 }}
+            {{- end }}
             {{- if $.Values.multiNode.mpiJob.workerAnnotations }}
             {{- toYaml $.Values.multiNode.mpiJob.workerAnnotations | nindent 12 }}
             {{- end }}
+          {{- end }}
         spec:
           serviceAccountName: {{ include "nim-llm.serviceAccountName" $ }}
           securityContext:
@@ -371,6 +427,13 @@ spec:
                   secretKeyRef:
                     name: {{ $.Values.model.ngcAPISecret }}
                     key: NGC_API_KEY
+              {{- if $.Values.model.hfTokenSecret }}
+              - name: HF_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ $.Values.model.hfTokenSecret }}
+                    key: HF_TOKEN
+              {{- end }}
               - name: NIM_SERVER_PORT
                 value: {{ $.Values.model.openaiPort | quote }}
               - name: NIM_JSONL_LOGGING
@@ -379,6 +442,10 @@ spec:
                 value: {{ $.Values.model.logLevel | quote }}
               - name: NIM_NUM_COMPUTE_NODES
                 value: {{ $.Values.multiNode.workers | quote }}
+              {{- if $.Values.proxyCA.enabled }}
+              - name: SSL_CERT_FILE
+                value: /opt/nim/proxy-ca
+              {{- end }}
               {{- if $.Values.env }}
               {{- toYaml $.Values.env | nindent 14 }}
               {{- end }}
@@ -414,6 +481,11 @@ spec:
             configMap:
               name: {{ include "nim-llm.fullname" $ }}-mpi-start-script
               defaultMode: 0555
+          {{- if $.Values.proxyCA.enabled }}
+          - name: proxy-ca
+            secret:
+              secretName: {{ $.Values.proxyCA.secretName }}
+          {{- end }}
   slotsPerWorker: {{ $.Values.multiNode.gpusPerNode }}
   sshAuthMountPath: {{ include "nim-llm.sshDir" $ }}
   launcherCreationPolicy: WaitForWorkersReady

@@ -31,8 +31,11 @@ spec:
       initContainers:
         {{- if .Values.postgresql.enabled }}
         - name: wait-for-postgres
-          image: busybox
-          command: ['sh', '-c', 'until nc -z {{ include "nemo-common.postgresql.host" . }} {{ include "nemo-common.postgresql.port" . }}; do echo "Waiting for Postgres to start"; sleep 5; done;']
+          image: {{ include "nemo-common.postgresql.wait-image" . }}
+          command:
+            - 'sh'
+            - '-c'
+            - 'for i in $(seq 1 50); do echo "Waiting for PostgreSQL to start (attempt $i of 50)"; nc -z {{ include "nemo-common.postgresql.host" . }} {{ include "nemo-common.postgresql.port" . }} && exit 0; sleep 5; done; echo "Failed to connect after 50 attempts."; exit 1'
         {{- end }}
         {{- include "nemo-evaluator.dbMigration" . | nindent 8 }}
       containers:
@@ -41,9 +44,6 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: {{ include "nemo-common.mainimage" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          envFrom:
-          - configMapRef:
-              name: evaluation-to-image-config
           env:
             - name: NAMESPACE
               valueFrom:
@@ -79,10 +79,15 @@ spec:
               value: "{{ .Values.evaluationJob.monitoringInterval }}"
             - name: EVAL_JOB_MONITORING_TIMEOUT
               value: "{{ .Values.evaluationJob.monitoringTimeout }}"
-            - name: EVAL_CONTAINER
-              value: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-            - name: EVAL_ENABLE_VALIDATION
-              value: "True"
+            {{- if .Values.evaluationImages }}
+            {{- range $k, $v := .Values.evaluationImages }}
+            {{- if ($v | trim) }}
+            # Set evaluation image overrides
+            - name: "{{ $k | trim }}"
+              value: "{{ $v | trim }}"
+            {{- end }}
+            {{- end }}
+            {{- end }}
             {{ include "nemo-common.env" . | nindent 12 | trim }}
             {{- if .Values.envVars }}
             {{- range $k, $v := .Values.envVars }}
@@ -142,9 +147,6 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: {{ include "nemo-common.mainimage" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          envFrom:
-          - configMapRef:
-              name: evaluation-to-image-config
           command: ["opentelemetry-instrument", "python", "-m", "evaluator.internal_server"]
           env:
             - name: HOST_IP

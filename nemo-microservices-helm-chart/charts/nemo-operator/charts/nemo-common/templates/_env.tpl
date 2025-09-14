@@ -119,3 +119,14 @@ nemo-common.database.password generates a POSTGRES_DB_PASSWORD environment value
       key: {{ include "nemo-common.postgresql.password-key" .}}
 {{- end }}
 {{- end -}}
+
+{{/*
+nemo-common.database.wait-image defines an image that is used when waiting for postgres to start
+*/}}
+{{- define "nemo-common.postgresql.wait-image" -}}
+{{- if .Values.image.registry -}}
+{{ .Values.postgresWaitImage.registry }}/{{ .Values.postgresWaitImage.registry }}:{{ .Values.postgresWaitImage.tag }}
+{{- else -}}
+{{ .Values.postgresWaitImage.repository }}:{{ .Values.postgresWaitImage.tag }}
+{{- end }}
+{{- end -}}

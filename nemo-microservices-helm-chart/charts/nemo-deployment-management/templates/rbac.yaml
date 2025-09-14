@@ -51,6 +51,7 @@ rules:
   - version
   - services
   - configmaps
+  - secrets
   verbs:
   - get
   - list

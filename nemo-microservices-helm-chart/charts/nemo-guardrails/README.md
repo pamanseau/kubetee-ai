@@ -50,6 +50,8 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | podAnnotations | object | `{}` | Specifies additional annotations to the main deployment pods. |
 | podLabels | object | `{}` | Specifies additional labels to the main deployment pods. |
 | podSecurityContext | object | `{}` | Specifies privilege and access control settings for the pod. |
+| postgresWaitImage.repository | string | `"busybox"` | The repository location of the image used to wait for postgres to start. |
+| postgresWaitImage.tag | string | `"latest"` | The tag of the image used when waiting. |
 | postgresql | object | `{"architecture":"standalone","auth":{"database":"nemo-guardrails","enablePostgresUser":true,"existingSecret":"","password":"guardrails","username":"guardrails"},"enabled":true,"nameOverride":"guardrailsdb","serviceAccount":{"create":true,"name":"guardrails-postgresql"}}` | PostgreSQL configuration for the NeMo Guardrails microservice. |
 | postgresql.architecture | string | `"standalone"` | The architecture for the default PostgreSQL service. |
 | postgresql.auth.database | string | `"nemo-guardrails"` | The name for a custom database to create. |

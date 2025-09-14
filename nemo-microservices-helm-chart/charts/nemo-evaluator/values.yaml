@@ -41,8 +41,7 @@ podSecurityContext: {}
 securityContext: {}
 
 # -- Additional environment variables to pass to containers. The format is `NAME: value` or `NAME: valueFrom: {object}`.
-env:
-  {}
+env: {}
 
 service:
   # -- The type of the NeMo Evaluator microservice.
@@ -193,6 +192,11 @@ postgresql:
       ports:
         # -- The primary service port for the PostgreSQL service.
         postgresql: 5432
+postgresWaitImage:
+  # -- The repository location of the image used to wait for postgres to start.
+  repository: "busybox"
+  # -- The tag of the image used when waiting.
+  tag: "latest"
 
 externalDatabase:
   # -- The host for an external database.
@@ -243,7 +247,7 @@ opentelemetry-collector:
         verbosity: detailed
     processors:
       # -- The batch processor for the OpenTelemetry Collector service.
-      batch:  {}
+      batch: {}
       # -- The tail sampling processor for the OpenTelemetry Collector service.
       tail_sampling:
         # filter out health checks

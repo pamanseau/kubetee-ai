@@ -31,8 +31,11 @@ spec:
       initContainers:
         {{- if .Values.postgresql.enabled }}
         - name: wait-for-postgres
-          image: busybox
-          command: ['sh', '-c', 'until nc -z {{ include "nemo-common.postgresql.host" . }} {{ include "nemo-common.postgresql.port" . }}; do echo "Waiting for Postgres to start"; sleep 5; done;']
+          image: {{ include "nemo-common.postgresql.wait-image" . }}
+          command:
+            - 'sh'
+            - '-c'
+            - 'for i in $(seq 1 50); do echo "Waiting for PostgreSQL to start (attempt $i of 50)"; nc -z {{ include "nemo-common.postgresql.host" . }} {{ include "nemo-common.postgresql.port" . }} && exit 0; sleep 5; done; echo "Failed to connect after 50 attempts."; exit 1'
         {{- end }}
         - name: guardrails-db-migration
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

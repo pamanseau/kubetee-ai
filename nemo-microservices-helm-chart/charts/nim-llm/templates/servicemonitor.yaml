@@ -14,5 +14,6 @@ spec:
     matchLabels:
       {{- include "nim-llm.selectorLabels" . | nindent 6 }}
   endpoints:
-  - port: {{ $.Values.model.legacyCompat | ternary "metrics" "http-openai" }}
+  - port: http-openai
+    path: /v1/metrics
 {{- end -}}

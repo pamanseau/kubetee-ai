@@ -1,7 +1,8 @@
 apiVersion: v2
-appVersion: "25.08"
+appVersion: "25.09"
 dependencies:
-- name: postgresql
+- condition: postgresql.enabled
+  name: postgresql
   repository: oci://dockerhub.nvidia.com/bitnamicharts
   version: 16.2.4
 - name: nemo-common
@@ -14,4 +15,4 @@ maintainers:
   url: https://www.nvidia.com
 name: nemo-auditor
 type: application
-version: 25.8.0
+version: 25.9.0

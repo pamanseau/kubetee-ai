@@ -8,16 +8,57 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| auditor.enabled | bool | `false` | Specifies whether to install the NeMo Auditor microservice. |
-| auditor.serviceName | string | `"nemo-auditor"` |  |
+| auditor.affinity | object | `{}` | Affinity rules for pod assignment. |
+| auditor.auditorApiKeysSecretName | string | `""` | Name of secret with authenitcation key for build.nvidia.com, if used. This must have a key of NIM_API_KEY and with the actual key as the value. |
+| auditor.autoscaling | object | `{"enabled":false,"maxReplicas":1,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Autoscaling configuration. |
+| auditor.env | object | `{}` | Environment variables to pass to containers. This is an object formatted like NAME: value or NAME: valueFrom: {object} |
+| auditor.externalDatabase | object | `{"database":"auditor","existingSecret":"","existingSecretPasswordKey":"","host":"","port":5432,"user":"nemo"}` | External PostgreSQL configuration. |
+| auditor.externalDatabase.database | string | `"auditor"` | The database name. |
+| auditor.externalDatabase.existingSecret | string | `""` | The name of an existing secret to use for PostgreSQL credentials. |
+| auditor.externalDatabase.existingSecretPasswordKey | string | `""` | The name of an existing secret key to use for PostgreSQL credentials. |
+| auditor.externalDatabase.host | string | `""` | The database host. |
+| auditor.externalDatabase.port | int | `5432` | The database port. |
+| auditor.externalDatabase.user | string | `"nemo"` | The database user. |
+| auditor.image | object | `{"pullPolicy":"IfNotPresent","repository":"nvcr.io/nvidia/nemo-microservices/auditor","tag":""}` | Container image configuration. |
+| auditor.ingress | object | `{"annotations":{},"className":"nginx","enabled":false,"hosts":{},"tls":[]}` | Ingress configuration. |
+| auditor.livenessProbe | object | `{"failureThreshold":100,"httpGet":{"path":"/health/live","port":"http"},"initialDelaySeconds":0,"periodSeconds":10,"timeoutSeconds":600}` | Liveness probe configuration. |
+| auditor.nodeSelector | object | `{}` | Node selector for pod assignment. |
+| auditor.podAnnotations | object | `{}` | Annotations to add to pods. |
+| auditor.podLabels | object | `{}` | Labels to add to pods. |
+| auditor.podSecurityContext | object | `{"fsGroup":1000}` | Security context for the pod. |
+| auditor.postgresql | object | `{"architecture":"standalone","auth":{"database":"auditor","enablePostgresUser":true,"existingSecret":"","password":"nemo","username":"nemo"},"enabled":true,"nameOverride":"auditdb","persistence":{"enabled":true,"size":"10Gi"},"service":{"ports":{"postgresql":5432}},"serviceAccount":{"create":true,"name":"auditor-postgresql"}}` | PostgreSQL configuration for the NeMo Auditor microservice. |
+| auditor.postgresql.architecture | string | `"standalone"` | The architecture for the default PostgreSQL service. |
+| auditor.postgresql.auth.database | string | `"auditor"` | The name for a custom database to create. |
+| auditor.postgresql.auth.enablePostgresUser | bool | `true` | Whether to assign a password to the "postgres" admin user. If disabled, remote access is blocked for this user. |
+| auditor.postgresql.auth.existingSecret | string | `""` | The name of an existing secret to use for PostgreSQL credentials. |
+| auditor.postgresql.auth.password | string | `"nemo"` | The password for the PostgreSQL user. |
+| auditor.postgresql.auth.username | string | `"nemo"` | The user name to use for the PostgreSQL database. |
+| auditor.postgresql.enabled | bool | `true` | Whether to install the default PostgreSQL Helm chart. If enabled, the NeMo Auditor microservice Helm chart uses the [PostgreSQL Helm chart from Bitnami](https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml) to create a PostgreSQL database. |
+| auditor.postgresql.nameOverride | string | `"auditdb"` | The name override for the Auditor PostgreSQL database. |
+| auditor.postgresql.serviceAccount.create | bool | `true` | Specifies whether to create a new service account for PostgreSQL. |
+| auditor.postgresql.serviceAccount.name | string | `"auditor-postgresql"` | The name of the service account for PostgreSQL. |
+| auditor.readinessProbe | object | `{"failureThreshold":100,"httpGet":{"path":"/health/ready","port":"http"},"initialDelaySeconds":0,"periodSeconds":10,"timeoutSeconds":600}` | Readiness probe configuration. |
+| auditor.replicaCount | int | `1` | Number of replicas for the Auditor deployment. |
+| auditor.resources | object | `{}` | Resource requests and limits. |
+| auditor.securityContext | object | `{}` | Security context for the container. |
+| auditor.service | object | `{"port":5000,"type":"ClusterIP"}` | Service configuration. |
+| auditor.serviceAccount | object | `{"annotations":{},"automount":true,"create":true,"name":""}` | Service account configuration. |
+| auditor.serviceAccount.annotations | object | `{}` | Annotations to add to the service account. |
+| auditor.serviceAccount.automount | bool | `true` | Automatically mount a ServiceAccount's API credentials. |
+| auditor.serviceAccount.create | bool | `true` | Specifies whether a service account should be created. |
+| auditor.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template. |
+| auditor.serviceName | string | `"nemo-auditor"` | Specifies whether to install the NeMo Auditor microservice. |
+| auditor.tolerations | list | `[]` | Tolerations for pod assignment. |
+| auditor.virtualService | object | `{"annotations":{},"apiPath":"/v1beta1/audit","dnsName":"auditor.example.local","enabled":false,"gateway":"istio-system/ingress-gateway"}` | Istio virtual service configuration. |
+| auditor.volumeMounts | list | `[]` | Additional volume mounts on the output Deployment definition. |
+| auditor.volumes | list | `[]` | Additional volumes on the output Deployment definition. |
 | customizer.apiImage | object | This object has the following default values for the NeMo Customizer API only image. | Customizer API only image configuration. |
 | customizer.apiImage.imagePullPolicy | string | `"IfNotPresent"` | Image pull policy for the NeMo Customizer API image. |
 | customizer.apiImage.registry | string | `"nvcr.io"` | Registry for the NeMo Customizer API image. |
 | customizer.apiImage.repository | string | `"nvidia/nemo-microservices/customizer-api"` | Repository for the NeMo Customizer API image. |
-| customizer.awsDeploy | object | `{"efaDevicesPerGPU":4,"enabled":false,"gpusPerNode":8}` | Deployment configurations for AWS |
+| customizer.awsDeploy | object | `{"efaDevicesPerGPU":4,"enabled":false}` | Deployment configurations for AWS |
 | customizer.awsDeploy.efaDevicesPerGPU | int | `4` | EFA number of devices per GPU |
 | customizer.awsDeploy.enabled | bool | `false` | Switch on if using AWS and kyverno is installed |
-| customizer.awsDeploy.gpusPerNode | int | `8` | This deployment expects a homogoneous cluster, this is the number of GPUs per node. Multinode training will only occur when the whole node is reserved |
 | customizer.customizationConfigTemplates | object | This object has the following default values. | List of customization configuration template supported by the Customizer. |
 | customizer.customizationConfigTemplates.overrideExistingTemplates | bool | `true` | Whether to have this values file override templates in the database on application start |
 | customizer.customizationConfigTemplates.templates | object | This object has the following default values. | The default templates to populate the database with |
@@ -362,13 +403,41 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.0.0+L40".training_options[0].num_nodes | int | `2` | The number of nodes to use for the specified training. |
 | customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.0.0+L40".training_options[0].pipeline_parallel_size | int | `2` | The number of GPUs among which the model’s layers are distributed. |
 | customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.0.0+L40".training_options[0].tensor_parallel_size | int | `4` | The number of GPUs among which the model’s tensors are partitioned. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100" | object | This object has the following default values for the Nemotron Super Llama 3.3 49B v1.5 Instruct model. | Nemotron Super Llama 3.3 49B v1.5 Instruct model configuration. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".max_seq_length | int | `4096` | The largest context used for training. Datasets are truncated based on the maximum sequence length. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".name | string | `"nemotron-super-llama-3.3-49b@v1.5+A100"` | The name for training config template. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".namespace | string | `"nvidia"` | The namespace for training config template. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".prompt_template | string | `"{prompt} {completion}"` | Prompt template used to extract keys from the dataset. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".target | string | `"nvidia/nemotron-super-llama-3.3-49b@1.5"` | The target to perform the customization on. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".training_options | list | `[{"finetuning_type":"lora","micro_batch_size":1,"num_gpus":4,"num_nodes":1,"tensor_parallel_size":4,"training_type":"sft"}]` | Resource configuration for each training option for the target model. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".training_options[0] | object | `{"finetuning_type":"lora","micro_batch_size":1,"num_gpus":4,"num_nodes":1,"tensor_parallel_size":4,"training_type":"sft"}` | Training method. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".training_options[0].finetuning_type | string | `"lora"` | The type of fine-tuning method. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".training_options[0].micro_batch_size | int | `1` | The number of training examples processed in parallel by each individual GPU. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".training_options[0].num_gpus | int | `4` | The number of GPUs per node to use for the specified training. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".training_options[0].num_nodes | int | `1` | The number of nodes to use for the specified training. |
+| customizer.customizationConfigTemplates.templates."nvidia/nemotron-super-llama-3.3-49b@v1.5+A100".training_options[0].tensor_parallel_size | int | `4` | The number of GPUs among which the model’s tensors are partitioned. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100" | object | This object has the following default values for the OpenAI gpt-oss 20b model. | Openai gpt-oss 20B model configuration. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".max_seq_length | int | `2048` | The largest context used for training. Datasets are truncated based on the maximum sequence length. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".name | string | `"gpt-oss-20b@v1.0.0+A100"` | The name for training config template. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".namespace | string | `"openai"` | The namespace for training config template. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".prompt_template | string | `"{prompt} {completion}"` | Prompt template used to extract keys from the dataset. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".target | string | `"openai/gpt-oss-20b@v1"` | The target to perform the customization on. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options | list | `[{"expert_model_parallel_size":4,"finetuning_type":"all_weights","micro_batch_size":1,"num_gpus":8,"num_nodes":1,"pipeline_parallel_size":2,"tensor_parallel_size":1,"training_type":"sft"}]` | Resource configuration for each training option for the target model. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options[0] | object | `{"expert_model_parallel_size":4,"finetuning_type":"all_weights","micro_batch_size":1,"num_gpus":8,"num_nodes":1,"pipeline_parallel_size":2,"tensor_parallel_size":1,"training_type":"sft"}` | Training method. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options[0].expert_model_parallel_size | int | `4` | Number of GPUs used to parallelize expert (MoE) components of the model. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options[0].finetuning_type | string | `"all_weights"` | The type of fine-tuning method. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options[0].micro_batch_size | int | `1` | The number of training examples processed in parallel by each individual GPU. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options[0].num_gpus | int | `8` | The number of GPUs per node to use for the specified training. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options[0].num_nodes | int | `1` | The number of nodes to use for the specified training. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options[0].pipeline_parallel_size | int | `2` | Number of GPUs used to split the model across layers for pipeline model. |
+| customizer.customizationConfigTemplates.templates."openai/gpt-oss-20b@v1.0.0+A100".training_options[0].tensor_parallel_size | int | `1` | The number of GPUs among which the model’s tensors are partitioned. |
 | customizer.customizationTargets | object | This object has the following default values. | List of model configurations supported by the Customizer. |
 | customizer.customizationTargets.hfTargetDownload.allowedHfOrgs | list | `[]` | List of allowed organizations for model downloads from Hugging Face. Empty list allows all organizations. Example: allowedHfOrgs:   - "nvidia" |
 | customizer.customizationTargets.hfTargetDownload.enabled | bool | `false` | set this to true to allow model downloads from Hugging Face. If enabled=false, models are not allwed to be downloaded from any Hugging Face org and allowedHfOrgs is disregarded |
 | customizer.customizationTargets.overrideExistingTargets | bool | `true` | Whether to have this values file override targets in the database on application start |
 | customizer.customizationTargets.targets | object | This object has the following default values. | The default targets to populate the database with |
 | customizer.customizationTargets.targets."meta/llama-3.1-70b-instruct@2.0" | object | This object has the following default values for the Llama 3.1 70B Instruct model. | Llama 3.1 70B Instruct model target configuration. |
-| customizer.customizationTargets.targets."meta/llama-3.1-70b-instruct@2.0".base_model | string | `"meta/llama-3.1-70b-instruct"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."meta/llama-3.1-70b-instruct@2.0".base_model | string | `"meta/llama-3.1-70b-instruct"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."meta/llama-3.1-70b-instruct@2.0".enabled | bool | `false` | Whether to enable the model. |
 | customizer.customizationTargets.targets."meta/llama-3.1-70b-instruct@2.0".model_path | string | `"llama-3_1-70b-instruct_2_0"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."meta/llama-3.1-70b-instruct@2.0".model_uri | string | `"ngc://nvidia/nemo/llama-3_1-70b-instruct-nemo:2.0"` | NGC model URI for Llama 3.1 70B Instruct model. |
@@ -377,7 +446,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."meta/llama-3.1-70b-instruct@2.0".num_parameters | int | `70000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."meta/llama-3.1-70b-instruct@2.0".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."meta/llama-3.1-8b-instruct@2.0" | object | This object has the following default values for the Llama 3.1 8B Instruct model. | Llama 3.1 8B Instruct model target configuration. |
-| customizer.customizationTargets.targets."meta/llama-3.1-8b-instruct@2.0".base_model | string | `"meta/llama-3.1-8b-instruct"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."meta/llama-3.1-8b-instruct@2.0".base_model | string | `"meta/llama-3.1-8b-instruct"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."meta/llama-3.1-8b-instruct@2.0".enabled | bool | `true` | Whether to enable the model. |
 | customizer.customizationTargets.targets."meta/llama-3.1-8b-instruct@2.0".model_path | string | `"llama-3_1-8b-instruct_2_0"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."meta/llama-3.1-8b-instruct@2.0".model_uri | string | `"ngc://nvidia/nemo/llama-3_1-8b-instruct-nemo:2.0"` | NGC model URI for Llama 3.1 8B Instruct model. |
@@ -386,7 +455,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."meta/llama-3.1-8b-instruct@2.0".num_parameters | int | `8000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."meta/llama-3.1-8b-instruct@2.0".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b-instruct@2.0" | object | This object has the following default values for the Llama 3.2 1B Instruct model. | Llama 3.2 1B Instruct model target configuration. |
-| customizer.customizationTargets.targets."meta/llama-3.2-1b-instruct@2.0".base_model | string | `"meta/llama-3.2-1b-instruct"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."meta/llama-3.2-1b-instruct@2.0".base_model | string | `"meta/llama-3.2-1b-instruct"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b-instruct@2.0".enabled | bool | `true` | Whether to enable the model. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b-instruct@2.0".model_path | string | `"llama32_1b-instruct_2_0"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b-instruct@2.0".model_uri | string | `"ngc://nvidia/nemo/llama-3_2-1b-instruct:2.0"` | NGC model URI |
@@ -395,7 +464,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."meta/llama-3.2-1b-instruct@2.0".num_parameters | int | `1000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b-instruct@2.0".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b@2.0" | object | This object has the following default values for the Llama 3.2 1B model. | Llama 3.2 1B target model configuration. |
-| customizer.customizationTargets.targets."meta/llama-3.2-1b@2.0".base_model | string | `"meta/llama-3.2-1b"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."meta/llama-3.2-1b@2.0".base_model | string | `"meta/llama-3.2-1b"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b@2.0".enabled | bool | `false` | Whether to enable the model. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b@2.0".model_path | string | `"llama32_1b_2_0"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b@2.0".model_uri | string | `"ngc://nvidia/nemo/llama-3_2-1b:2.0"` | NGC model URI for Llama 3.2 1B model. |
@@ -404,7 +473,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."meta/llama-3.2-1b@2.0".num_parameters | int | `1000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."meta/llama-3.2-1b@2.0".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."meta/llama-3.2-3b-instruct@2.0" | object | This object has the following default values for the Llama 3.2 3B Instruct model. | Llama 3.2 3B Instruct model target configuration. |
-| customizer.customizationTargets.targets."meta/llama-3.2-3b-instruct@2.0".base_model | string | `"meta/llama-3.2-3b-instruct"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."meta/llama-3.2-3b-instruct@2.0".base_model | string | `"meta/llama-3.2-3b-instruct"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."meta/llama-3.2-3b-instruct@2.0".enabled | bool | `false` | Whether to enable the model. |
 | customizer.customizationTargets.targets."meta/llama-3.2-3b-instruct@2.0".model_path | string | `"llama32_3b-instruct_2_0"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."meta/llama-3.2-3b-instruct@2.0".model_uri | string | `"ngc://nvidia/nemo/llama-3_2-3b-instruct:2.0"` | NGC model URI. |
@@ -413,7 +482,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."meta/llama-3.2-3b-instruct@2.0".num_parameters | int | `3000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."meta/llama-3.2-3b-instruct@2.0".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."meta/llama-3.3-70b-instruct@2.0" | object | This object has the following default values for the Llama 3.3 70B Instruct model. | Llama 3.3 70B Instruct model target configuration. |
-| customizer.customizationTargets.targets."meta/llama-3.3-70b-instruct@2.0".base_model | string | `"meta/llama-3.3-70b-instruct"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."meta/llama-3.3-70b-instruct@2.0".base_model | string | `"meta/llama-3.3-70b-instruct"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."meta/llama-3.3-70b-instruct@2.0".enabled | bool | `false` | Whether to enable the model. |
 | customizer.customizationTargets.targets."meta/llama-3.3-70b-instruct@2.0".model_path | string | `"llama-3_3-70b-instruct_2_0"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."meta/llama-3.3-70b-instruct@2.0".model_uri | string | `"ngc://nvidia/nemo/llama-3_3-70b-instruct:2.0"` | NGC model URI for Llama 3.3 70B Instruct model. |
@@ -422,7 +491,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."meta/llama-3.3-70b-instruct@2.0".num_parameters | int | `70000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."meta/llama-3.3-70b-instruct@2.0".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."meta/llama3-70b-instruct@2.0" | object | This object has the following default values for the Llama 3 70B Instruct model. | Llama 3 70B Instruct model target configuration. |
-| customizer.customizationTargets.targets."meta/llama3-70b-instruct@2.0".base_model | string | `"meta/llama3-70b-instruct"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."meta/llama3-70b-instruct@2.0".base_model | string | `"meta/llama3-70b-instruct"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."meta/llama3-70b-instruct@2.0".enabled | bool | `false` | Whether to enable the model. |
 | customizer.customizationTargets.targets."meta/llama3-70b-instruct@2.0".model_path | string | `"llama-3-70b-bf16_2_0"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."meta/llama3-70b-instruct@2.0".model_uri | string | `"ngc://nvidia/nemo/llama-3-70b-instruct-nemo:2.0"` | NGC model URI for Llama 3 70B Instruct model. |
@@ -431,7 +500,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."meta/llama3-70b-instruct@2.0".num_parameters | int | `70000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."meta/llama3-70b-instruct@2.0".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."microsoft/phi-4@1.0" | object | This object has the following default values for the Phi-4. | Phi-4 model target configuration. |
-| customizer.customizationTargets.targets."microsoft/phi-4@1.0".base_model | string | `"microsoft/phi-4"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."microsoft/phi-4@1.0".base_model | string | `"microsoft/phi-4"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."microsoft/phi-4@1.0".enabled | bool | `false` | Whether to enable the model. |
 | customizer.customizationTargets.targets."microsoft/phi-4@1.0".model_path | string | `"phi-4_1_0"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."microsoft/phi-4@1.0".model_uri | string | `"ngc://nvidia/nemo/phi-4:1.0"` | NGC model URI for Phi-4 model. |
@@ -450,7 +519,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."nvidia/llama-3.2-nv-embedqa-1b@v2".num_parameters | int | `1000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."nvidia/llama-3.2-nv-embedqa-1b@v2".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."nvidia/nemotron-nano-llama-3.1-8b@1.0" | object | This object has the following default values for the Nemotron Nano Llama 3.1 8B Instruct model. | Nemotron Nano Llama 3.1 8B Instruct model target configuration. |
-| customizer.customizationTargets.targets."nvidia/nemotron-nano-llama-3.1-8b@1.0".base_model | string | `"nvidia/nemotron-nano-llama-3.1-8b"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."nvidia/nemotron-nano-llama-3.1-8b@1.0".base_model | string | `"nvidia/nemotron-nano-llama-3.1-8b"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."nvidia/nemotron-nano-llama-3.1-8b@1.0".enabled | bool | `false` | Whether to enable the model. |
 | customizer.customizationTargets.targets."nvidia/nemotron-nano-llama-3.1-8b@1.0".model_path | string | `"nemotron-nano-3_1-8b_0_0_1"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."nvidia/nemotron-nano-llama-3.1-8b@1.0".model_uri | string | `"ngc://nvidia/nemo/nemotron-nano-3_1-8b:0.0.1"` | NGC model URI |
@@ -459,14 +528,34 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.customizationTargets.targets."nvidia/nemotron-nano-llama-3.1-8b@1.0".num_parameters | int | `8000000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."nvidia/nemotron-nano-llama-3.1-8b@1.0".precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0" | object | This object has the following default values for the Nemotron Super Llama 3.3 49B Instruct model. | Nemotron Super Llama 3.3 49B Instruct model target configuration. |
-| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".base_model | string | `"nvidia/nemotron-super-llama-3.3-49b"` | Mapping to the model name in NIM. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".base_model | string | `"nvidia/nemotron-super-llama-3.3-49b"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
 | customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".enabled | bool | `false` | Whether to enable the model. |
 | customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".model_path | string | `"nemotron-super-3_3-49b_v1"` | Path where model files are stored. |
 | customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".model_uri | string | `"ngc://nvidia/nemo/nemotron-super-3_3-49b:v1"` | NGC model URI |
 | customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".name | string | `"nemotron-super-llama-3.3-49b@1.0"` | The name for target model. |
 | customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".namespace | string | `"nvidia"` | The namespace for target model. |
-| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".num_parameters | int | `8000000000` | Number of model parameters. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".num_parameters | int | `4900000000` | Number of model parameters. |
 | customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.0".precision | string | `"bf16-mixed"` | Model precision format. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5" | object | This object has the following default values for the Nemotron Super Llama 3.3 49B v1.5 Instruct model. | Nemotron Super Llama 3.3 49B v1.5 Instruct model target configuration. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".base_model | string | `"nvidia/nemotron-super-llama-3.3-49b-v1.5"` | Mapping to the model name in NIM and Recipe Selection in Customizer. Defaults to being the same as the the configuration entry namespace/name. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".enabled | bool | `false` | Whether to enable the model. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".hf_endpoint | string | `"https://huggingface.co"` | Endpoint for where to find this model |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".model_path | string | `"nemotron-super-3_3-49b_v1_5"` | Path where model files are stored. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".model_uri | string | `"hf://nvidia/Llama-3_3-Nemotron-Super-49B-v1_5"` | NGC model URI |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".name | string | `"nemotron-super-llama-3.3-49b@1.5"` | The name for target model. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".namespace | string | `"nvidia"` | The namespace for target model. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".num_parameters | int | `4900000000` | Number of model parameters. |
+| customizer.customizationTargets.targets."nvidia/nemotron-super-llama-3.3-49b@1.5".precision | string | `"bf16-mixed"` | Model precision format. |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1 | object | This object has the following default values for the openai/gpt-oss-20b model. | openai/gpt-oss-20b target model configuration. |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.base_model | string | `"openai/gpt-oss-20b"` | Mapping to the model name to the optimized llama embedding training script and NIM |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.enabled | bool | `false` | Whether to enable the model. |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.hf_endpoint | string | `"https://huggingface.co"` | HF endpoint |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.model_path | string | `"gpt_oss_20b-embedding"` | Path where model files are stored. |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.model_uri | string | `"hf://openai/gpt-oss-20b"` | HF model URI |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.name | string | `"gpt-oss-20b@v1"` | The name for target model. |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.namespace | string | `"openai"` | The namespace for target model. |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.num_parameters | int | `21000000000` | Number of model parameters. |
+| customizer.customizationTargets.targets.openai/gpt-oss-20b@v1.precision | string | `"bf16-mixed"` | Model precision format. |
 | customizer.customizerConfig | object | This object has default values for the following fields. | Configuration for the NeMo Customizer microservice. |
 | customizer.customizerConfig.entityStoreURL | string | `"http://nemo-entity-store:8000"` | Specifies the internal K8s DNS record for the NeMo Entity Store service. |
 | customizer.customizerConfig.mlflowURL | string | `""` | URL for the MLflow tracking server. |
@@ -501,6 +590,10 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | customizer.externalDatabase.port | int | `5432` | External database port number. |
 | customizer.externalDatabase.user | string | `"nemo"` | Database username for the NeMo Customizer microservice. |
 | customizer.fullnameOverride | string | `""` | String to fully override the chart and release name on resulting objects when deployed. |
+| customizer.gptOssImage | object | This object has the following default values for the NeMo Customizer microservice image. | NeMo Customizer image that supports training ONLY for gpt-oss model |
+| customizer.gptOssImage.imagePullPolicy | string | `"IfNotPresent"` | Image pull policy for the NeMo Customizer image. |
+| customizer.gptOssImage.registry | string | `"nvcr.io"` | Registry for the NeMo Customizer image. |
+| customizer.gptOssImage.repository | string | `"nvidia/nemo-microservices/customizer-gpt-oss"` | Repository for the NeMo Customizer image. |
 | customizer.hfAPISecret | string | `nil` | The K8s Secret containing the HuggingFace API token. |
 | customizer.hfAPISecretKey | string | `"HF_TOKEN"` | The key in the hfAPISecret containing the actual secret's value. Defaults to HF_TOKEN |
 | customizer.image | object | This object has the following default values for the NeMo Customizer microservice image. | NeMo Customizer image that supports training and standalone mode. |
@@ -605,9 +698,9 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | data-store.deployment.terminationGracePeriodSeconds | int | `60` | How long to wait until forcefully kill the pod. |
 | data-store.dnsConfig | object | `{}` | dnsConfig configuration for the deployment. |
 | data-store.env | object | `{}` | Additional environment variables to pass to containers. This is an object formatted like NAME: value or NAME: valueFrom: {object}. |
-| data-store.external | object | `{"domain":"","rootUrl":""}` | External URL configuration for the NeMo Data Store microservice. |
-| data-store.external.domain | string | `""` | The external URL's domain name. |
-| data-store.external.rootUrl | string | `""` | The external URL where users will access the NeMo Data Store microservice. |
+| data-store.external | object | `{"domain":"data-store.test","rootUrl":"http://data-store.test"}` | External URL configuration for the NeMo Data Store microservice. |
+| data-store.external.domain | string | `"data-store.test"` | The external URL's domain name. |
+| data-store.external.rootUrl | string | `"http://data-store.test"` | The external URL where users will access the NeMo Data Store microservice. |
 | data-store.externalDatabase | object | This object has the following default values for the external PostgreSQL configuration. | External PostgreSQL configuration settings. These values are only used when postgresql.enabled is set to false. |
 | data-store.externalDatabase.database | string | `""` | Datastore database name. |
 | data-store.externalDatabase.existingSecret | string | `""` | Name of an existing secret resource containing the database credentials. |
@@ -795,10 +888,10 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | deployment-management.dataStore.secret.create | bool | `true` | Whether to create a secret for the data store huggingface token. If false, the secret must be created manually. |
 | deployment-management.dataStore.secret.name | string | `"nemo-deployment-management-service-ds-hf-token"` | The name of the secret that will be created. If create is false, a secret with this name must be created manually and have the HF_TOKEN key set. |
 | deployment-management.dataStore.url | string | `"http://nemo-data-store:3000"` | The URL for the NeMo Data Store service. |
-| deployment-management.deployments | object | `{"autoscaling":{"enabled":false,"spec":{"maxReplicas":5,"metrics":[{"pods":{"metric":{"name":"gpu_cache_usage_perc"},"target":{"averageValue":"750m","type":"AverageValue"}},"type":"Pods"}],"minReplicas":1}},"defaultStorageClass":"","entityStoreUrl":"http://nemo-entity-store:8000","metrics":{"enabled":false},"modelPullerImage":"nvcr.io/nvidia/nemo-microservices/nds-v2-huggingface-cli:25.06","modelPullerPullSecret":"nvcrimagepullsecret","modelSyncPeriod":"30","nimImagePullSecrets":["nvcrimagepullsecret"],"nimPeftSource":"http://nemo-entity-store:8000","nimPvcSize":"25Gi"}` | Properties to configure NIM deployments for the NeMo Deployment Management microservice. |
+| deployment-management.deployments | object | `{"autoscaling":{"enabled":false,"spec":{"maxReplicas":5,"metrics":[{"pods":{"metric":{"name":"gpu_cache_usage_perc"},"target":{"averageValue":"750m","type":"AverageValue"}},"type":"Pods"}],"minReplicas":1}},"defaultStorageClass":"","entityStoreUrl":"http://nemo-entity-store:8000","metrics":{"enabled":false},"modelPullerImage":"nvcr.io/nvidia/nemo-microservices/nds-v2-huggingface-cli:25.06","modelPullerPullSecret":"nvcrimagepullsecret","modelSyncPeriod":"30","nimImagePullSecrets":["nvcrimagepullsecret"],"nimPeftSource":"http://nemo-entity-store:8000","nimPvcSize":"200Gi"}` | Properties to configure NIM deployments for the NeMo Deployment Management microservice. |
 | deployment-management.deployments.autoscaling.enabled | bool | `false` | Whether to enable autoscaling for the NIM deployments. |
 | deployment-management.deployments.autoscaling.spec | object | `{"maxReplicas":5,"metrics":[{"pods":{"metric":{"name":"gpu_cache_usage_perc"},"target":{"averageValue":"750m","type":"AverageValue"}},"type":"Pods"}],"minReplicas":1}` | Autoscaling specification for the NIM deployments. |
-| deployment-management.deployments.defaultStorageClass | string | `""` | The default storage class for NIM deployments. |
+| deployment-management.deployments.defaultStorageClass | string | `""` | Storage classes utilizing NFSv3+ may encounter issues with huggingface-cli file locking. |
 | deployment-management.deployments.entityStoreUrl | string | `"http://nemo-entity-store:8000"` | The URL for the NeMo Entity Store service. |
 | deployment-management.deployments.metrics.enabled | bool | `false` | Whether to enable metrics collection for the NIM deployments. |
 | deployment-management.deployments.modelPullerImage | string | `"nvcr.io/nvidia/nemo-microservices/nds-v2-huggingface-cli:25.06"` | The image to use for pulling models from NeMo Data Store. Must have the huggingface-cli binary installed. |
@@ -806,7 +899,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | deployment-management.deployments.modelSyncPeriod | string | `"30"` | The period in seconds for model synchronization. |
 | deployment-management.deployments.nimImagePullSecrets | list | `["nvcrimagepullsecret"]` | List of image pull secrets for the NIM deployments. |
 | deployment-management.deployments.nimPeftSource | string | `"http://nemo-entity-store:8000"` | The URL for PEFT model sources (typically points to NeMo Entity Store) |
-| deployment-management.deployments.nimPvcSize | string | `"25Gi"` | The size of the PVC for the NIM deployments. |
+| deployment-management.deployments.nimPvcSize | string | `"200Gi"` | The size of the PVC for the NIM deployments. |
 | deployment-management.env | object | `{}` | Additional environment variables to pass to the NeMo Deployment Management microservice container. The format is `NAME: value` or `NAME: valueFrom: {object}`. |
 | deployment-management.fullnameOverride | string | `""` | String to fully override the name on resulting Kubernetes objects when the NeMo Deployment Management microservice is deployed. |
 | deployment-management.image.pullPolicy | string | `"IfNotPresent"` | The container image pull policy for the NeMo Deployment Management container. |
@@ -845,15 +938,6 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | deployment-management.tolerations | list | `[]` | Specifies tolerations for pod assignment. To learn more, refer to the [Taint and Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) in the Kubernetes documentation. |
 | deployment-management.volumeMounts | list | `[]` | Additional volume mounts for the NeMo Deployment Management microservice. Use the default settings and leave it with the empty list as is, unless you understand what changes you want to make. |
 | deployment-management.volumes | list | `[]` | Additional volumes for the NeMo Deployment Management microservice. Use the default settings and leave it with the empty list as is, unless you understand what changes you want to make. |
-| dgxc-admission-controller.cloudProviderSpec.dummy | object | `{"type":"dummy"}` | The type of the dummy cloud provider. |
-| dgxc-admission-controller.dgxcController.image | string | `"nvcr.io/nvidia/nemo-microservices/dgxc-admission-controller:1.801.0"` | The image for the DGX Cloud Admission Controller. |
-| dgxc-admission-controller.enableDGXCRbac | bool | `false` |  |
-| dgxc-admission-controller.enableIntegrationsSupport | bool | `false` | Specifies whether to enable integrations support. |
-| dgxc-admission-controller.enableLabeler | bool | `false` | Specifies whether to enable the labeler. |
-| dgxc-admission-controller.enableNetworkPolicies | bool | `false` | Specifies whether to enable network policies. |
-| dgxc-admission-controller.enabled | bool | `false` | Specifies whether to install the DGX Cloud Admission Controller. |
-| dgxc-admission-controller.imagePullSecret | string | `"nvcrimagepullsecret"` | The image pull secret for the DGX Cloud Admission Controller. |
-| dgxc-admission-controller.kubernetesAffinity.enabled | bool | `false` | Specifies whether to enable Kubernetes affinity. |
 | entity-store.affinity | object | `{}` | Additional affinity for the deployment. |
 | entity-store.appConfig | object | `{"BASE_URL_DATASTORE":"http://nemo-data-store:3000/v1/hf","BASE_URL_NIM":"http://nemo-nim-proxy:8000"}` | Additional NeMo Entity Store API server specific configs. |
 | entity-store.appConfig.BASE_URL_DATASTORE | string | `"http://nemo-data-store:3000/v1/hf"` | The base URL for the NeMo Data Store microservice. |
@@ -896,6 +980,8 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | entity-store.podAnnotations | object | `{}` | Additional annotations for the NeMo Entity Store pods. |
 | entity-store.podLabels | object | `{}` | Additional labels for the NeMo Entity Store pods. |
 | entity-store.podSecurityContext | object | `{}` | The pod security context for the NeMo Entity Store pods. |
+| entity-store.postgresWaitImage.repository | string | `"busybox"` | The repository location of the image used to wait for postgres to start. |
+| entity-store.postgresWaitImage.tag | string | `"latest"` | The tag of the image used when waiting. |
 | entity-store.postgresql.architecture | string | `"standalone"` | The PostgreSQL architecture. Available options are `standalone` or `replication`. |
 | entity-store.postgresql.auth.database | string | `"entity-store"` | The name for a custom database to create. |
 | entity-store.postgresql.auth.enablePostgresUser | bool | `true` | Whether to assign a password to the "postgres" admin user. If disabled, remote access is blocked for this user. |
@@ -934,12 +1020,15 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | evaluator.env | object | `{}` | Additional environment variables to pass to containers. The format is `NAME: value` or `NAME: valueFrom: {object}`. |
 | evaluator.evalFactory.job.restartPolicy | string | `"Never"` | Restart policy for the pods of the core eval jobs. |
 | evaluator.evalFactory.job.ttlSecondsAfterFinished | int | `172800` | Time-to-live after completion for the core eval jobs. |
-| evaluator.evaluationImages.agenticEval | string | `"nvcr.io/nvidia/eval-factory/agentic_eval:25.06.2"` | The image for the Agentic evaluation. |
-| evaluator.evaluationImages.bfcl | string | `"nvcr.io/nvidia/eval-factory/bfcl:25.06.2"` | The image for the BFCL evaluation. |
-| evaluator.evaluationImages.bigcodeEvalHarness | string | `"nvcr.io/nvidia/eval-factory/bigcode-evaluation-harness:25.06.2"` | The image for the bigcode evaluation harness evaluation. |
-| evaluator.evaluationImages.lmEvalHarness | string | `"nvcr.io/nvidia/eval-factory/lm-evaluation-harness:25.06.2"` | The image for the language model evaluation harness evaluation. |
-| evaluator.evaluationImages.rag | string | `"nvcr.io/nvidia/eval-factory/rag_retriever_eval:25.06.2"` | The image for the RAG evaluation. |
-| evaluator.evaluationImages.retriever | string | `"nvcr.io/nvidia/eval-factory/rag_retriever_eval:25.06.2"` | The image for the retriever evaluation. |
+| evaluator.evaluationImages | object | `{"AGENTIC_EVAL":"","BFCL":"","BIGCODE_EVALUATION_HARNESS":"","LM_EVAL_HARNESS":"","RAG":"","RETRIEVER":"","SAFETY_HARNESS":"","SIMPLE_EVALS":""}` | Optional override for evaluation images. |
+| evaluator.evaluationImages.AGENTIC_EVAL | string | `""` | The image for the Agentic evaluation: nvcr.io/nvidia/eval-factory/agentic_eval |
+| evaluator.evaluationImages.BFCL | string | `""` | The image for the BFCL evaluation: nvcr.io/nvidia/eval-factory/bfcl |
+| evaluator.evaluationImages.BIGCODE_EVALUATION_HARNESS | string | `""` | The image for the bigcode evaluation harness evaluation: nvcr.io/nvidia/eval-factory/bigcode-evaluation-harness |
+| evaluator.evaluationImages.LM_EVAL_HARNESS | string | `""` | The image for the language model evaluation harness evaluation: nvcr.io/nvidia/eval-factory/lm-evaluation-harness |
+| evaluator.evaluationImages.RAG | string | `""` | The image for the RAG evaluation: nvcr.io/nvidia/eval-factory/rag_retriever_eval |
+| evaluator.evaluationImages.RETRIEVER | string | `""` | The image for the retriever evaluation: nvcr.io/nvidia/eval-factory/rag_retriever_eval |
+| evaluator.evaluationImages.SAFETY_HARNESS | string | `""` | The image for the model safety evaluation: nvcr.io/nvidia/eval-factory/safety-harness |
+| evaluator.evaluationImages.SIMPLE_EVALS | string | `""` | The image for the Simple-Evals evaluation: nvcr.io/nvidia/eval-factory/simple-evals |
 | evaluator.evaluationJob.monitoringInterval | int | `5` | Monitoring interval checking evaluation job status (in seconds). |
 | evaluator.evaluationJob.monitoringTimeout | int | `36000` | Monitoring timeout for checking evaluation job status (in seconds). |
 | evaluator.evaluator | object | `{"host":"0.0.0.0"}` | Host for the NeMo Evaluator microservice. |
@@ -1010,6 +1099,8 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | evaluator.podAnnotations | object | `{}` | Annotations for the service pod. |
 | evaluator.podLabels | object | `{}` | Labels for the service pod. |
 | evaluator.podSecurityContext | object | `{}` | Security context for the service pod. |
+| evaluator.postgresWaitImage.repository | string | `"busybox"` | The repository location of the image used to wait for postgres to start. |
+| evaluator.postgresWaitImage.tag | string | `"latest"` | The tag of the image used when waiting. |
 | evaluator.postgresql.architecture | string | `"standalone"` | The architecture for the default PostgreSQL service. |
 | evaluator.postgresql.auth.database | string | `"evaluation"` | The database for the PostgreSQL service. |
 | evaluator.postgresql.auth.enablePostgresUser | bool | `true` | Whether to enable the PostgreSQL user. |
@@ -1054,7 +1145,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | guardrails.configStore.nfs.path | string | `"/path/to/nfs/share"` | The path to the root of the Configuration Store folder. |
 | guardrails.configStore.nfs.server | string | `"nfs-server.example.com"` | The address of the NFS server. |
 | guardrails.configStore.nfs.storageClass | string | `"standard"` | The storage class for the PV and PVC. |
-| guardrails.env | object | `{"CONFIG_STORE_PATH":"/app/services/guardrails/config-store","DEFAULT_CONFIG_ID":"self-check","DEFAULT_LLM_PROVIDER":"nim","DEMO":"True","GUARDRAILS_HOST":"0.0.0.0","GUARDRAILS_PORT":"7331","NEMO_GUARDRAILS_SERVER_ALLOWED_ORIGINS":"*","NEMO_GUARDRAILS_SERVER_ENABLE_CORS":"False","NIM_ENDPOINT_URL":"http://nemo-nim-proxy:8000/v1"}` | Environment variables for the container. |
+| guardrails.env | object | `{"CONFIG_STORE_PATH":"/app/services/guardrails/config-store","DEFAULT_CONFIG_ID":"self-check","DEFAULT_LLM_PROVIDER":"nim","DEMO":"True","FETCH_NIM_APP_MODELS":"True","GUARDRAILS_HOST":"0.0.0.0","GUARDRAILS_PORT":"7331","NEMO_GUARDRAILS_SERVER_ALLOWED_ORIGINS":"*","NEMO_GUARDRAILS_SERVER_ENABLE_CORS":"False","NIM_ENDPOINT_URL":"http://nemo-nim-proxy:8000/v1"}` | Environment variables for the container. |
 | guardrails.env.NIM_ENDPOINT_URL | string | `"http://nemo-nim-proxy:8000/v1"` | The NIM endpoint URL for the NeMo Guardrails microservice. |
 | guardrails.external.entityStore.endpoint | string | `"http://nemo-entity-store:8000"` | The external URL of the NeMo Entity Store microservice. |
 | guardrails.externalDatabase | object | `{"database":"","existingSecret":"","existingSecretPasswordKey":"","host":"","port":"","uriSecret":{"key":"","name":""},"user":""}` | External PostgreSQL configuration. |
@@ -1086,6 +1177,8 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | guardrails.podAnnotations | object | `{}` | Specifies additional annotations to the main deployment pods. |
 | guardrails.podLabels | object | `{}` | Specifies additional labels to the main deployment pods. |
 | guardrails.podSecurityContext | object | `{}` | Specifies privilege and access control settings for the pod. |
+| guardrails.postgresWaitImage.repository | string | `"busybox"` | The repository location of the image used to wait for postgres to start. |
+| guardrails.postgresWaitImage.tag | string | `"latest"` | The tag of the image used when waiting. |
 | guardrails.postgresql.architecture | string | `"standalone"` | The architecture for the default PostgreSQL service. |
 | guardrails.postgresql.auth.database | string | `"nemo-guardrails"` | The name for a custom database to create. |
 | guardrails.postgresql.auth.enablePostgresUser | bool | `true` | Whether to assign a password to the "postgres" admin user. If disabled, remote access is blocked for this user. |
@@ -1113,12 +1206,12 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | imagePullSecrets | list | `[{"name":"nvcrimagepullsecret","password":"YOUR-NGC-API-KEY","registry":"nvcr.io","username":"$$oauthtoken"}]` | List of image pull secrets. Existing secrets override these values if you specify them. Use this only for experimentation when you want to hardcode a secret in your values file. |
 | ingress.annotations | object | `{"ingress.kubernetes.io/proxy-body-size":"50g","nginx.ingress.kubernetes.io/proxy-body-size":"50g"}` | Annotations for the ingress resource. |
 | ingress.className | string | `""` | The ingress class to use if your cluster has more than one class. |
-| ingress.enabled | bool | `false` | Specifies whether to enable the ingress. |
-| ingress.hosts | object | `{"dataStore":{"name":"data-store.test","paths":[{"path":"/","pathType":"Prefix","port":3000,"service":"nemo-data-store"}]},"default":{"name":"","paths":[{"path":"/v1/namespaces","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/projects","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/datasets","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/repos","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/models","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/customization","pathType":"Prefix","port":8000,"service":"nemo-customizer"},{"path":"/v1/evaluation","pathType":"Prefix","port":7331,"service":"nemo-evaluator"},{"path":"/v1/guardrail","pathType":"Prefix","port":7331,"service":"nemo-guardrails"},{"path":"/v1/deployment","pathType":"Prefix","port":8000,"service":"nemo-deployment-management"}]},"nimProxy":{"name":"nim.test","paths":[{"path":"/v1/completions","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/chat","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/embeddings","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/models","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"}]}}` | A map of hosts and their corresponding paths for the ingress. |
+| ingress.enabled | bool | `true` | Specifies whether to enable the ingress. |
+| ingress.hosts | object | `{"dataStore":{"name":"data-store.test","paths":[{"path":"/","pathType":"Prefix","port":3000,"service":"nemo-data-store"}]},"default":{"name":"","paths":[{"path":"/v1/namespaces","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/projects","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/datasets","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/repos","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/models","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/customization","pathType":"Prefix","port":8000,"service":"nemo-customizer"},{"path":"/v1/evaluation","pathType":"Prefix","port":7331,"service":"nemo-evaluator"},{"path":"/v1/guardrail","pathType":"Prefix","port":7331,"service":"nemo-guardrails"},{"path":"/v1/deployment","pathType":"Prefix","port":8000,"service":"nemo-deployment-management"},{"path":"/v1beta1/audit","pathType":"Prefix","port":5000,"service":"nemo-auditor"}]},"nimProxy":{"name":"nim.test","paths":[{"path":"/v1/completions","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/chat","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/embeddings","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/models","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"}]}}` | A map of hosts and their corresponding paths for the ingress. |
 | ingress.hosts.dataStore.name | string | `"data-store.test"` | The host name for the third ingress host for the NeMo Data Store microservice. |
 | ingress.hosts.dataStore.paths | list | `[{"path":"/","pathType":"Prefix","port":3000,"service":"nemo-data-store"}]` | The path rules for the third ingress host. |
 | ingress.hosts.default.name | string | `""` | The host name for the default ingress host. |
-| ingress.hosts.default.paths | list | `[{"path":"/v1/namespaces","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/projects","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/datasets","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/repos","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/models","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/customization","pathType":"Prefix","port":8000,"service":"nemo-customizer"},{"path":"/v1/evaluation","pathType":"Prefix","port":7331,"service":"nemo-evaluator"},{"path":"/v1/guardrail","pathType":"Prefix","port":7331,"service":"nemo-guardrails"},{"path":"/v1/deployment","pathType":"Prefix","port":8000,"service":"nemo-deployment-management"}]` | The path rules for the default ingress host. |
+| ingress.hosts.default.paths | list | `[{"path":"/v1/namespaces","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/projects","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/datasets","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/repos","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/models","pathType":"Prefix","port":8000,"service":"nemo-entity-store"},{"path":"/v1/customization","pathType":"Prefix","port":8000,"service":"nemo-customizer"},{"path":"/v1/evaluation","pathType":"Prefix","port":7331,"service":"nemo-evaluator"},{"path":"/v1/guardrail","pathType":"Prefix","port":7331,"service":"nemo-guardrails"},{"path":"/v1/deployment","pathType":"Prefix","port":8000,"service":"nemo-deployment-management"},{"path":"/v1beta1/audit","pathType":"Prefix","port":5000,"service":"nemo-auditor"}]` | The path rules for the default ingress host. |
 | ingress.hosts.nimProxy.name | string | `"nim.test"` | The host name for the second ingress host for the NIM Proxy microservice. |
 | ingress.hosts.nimProxy.paths | list | `[{"path":"/v1/completions","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/chat","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/embeddings","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"},{"path":"/v1/models","pathType":"Prefix","port":8000,"service":"nemo-nim-proxy"}]` | The path rules for the second ingress host. |
 | ingress.tls | list | `[]` | TLS configurations. |
@@ -1149,7 +1242,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | nemo-operator.metricsService.enabled | bool | `true` | Whether to enable the metrics service for the NeMo Operator microservice. If you enable it, the microservice exposes a metrics endpoint for Prometheus. Before installing this chart, you should have Prometheus installed in your environment. |
 | nemo-operator.metricsService.ports | list | `[{"name":"https","port":8443,"protocol":"TCP","targetPort":"https"}]` | The metrics service ports configuration. |
 | nemo-operator.metricsService.type | string | `"ClusterIP"` | The type of the metrics service. |
-| nemo-operator.restrictedNamespace | string | `""` | Namespace to restrict the NeMo Operator microservice to watch resources in. Leave it empty to watch all namespaces. |
+| nemo-operator.watchAllNamespaces | bool | `false` | Whether to watch all namespaces, default is to restrict the NeMo Operator microservice to watch resources in the NMP deployment namespace. |
 | ngcAPIKey | string | `"YOUR-NGC-API-KEY"` | Your NVIDIA GPU Cloud (NGC) API key authenticates and enables pulling images from the NGC container registry. The existing secret overrides this key if you provide one to the `existingSecret` key. |
 | nim-operator.nfd.nodeFeatureRules.deviceID | bool | `false` | Specifies whether to enable device ID feature rules. |
 | nim-proxy.affinity | object | `{}` | Specifies affinity settings for the deployment. To learn more, refer to [Affinity and Anti-Affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) in the Kubernetes documentation. |
@@ -1202,7 +1295,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | nim.enabled | bool | `false` | Specifies whether to deploy a NIM for LLM during the Helm installation of the chart. You can deploy a single static NIM by enabling this object and its values. When enabled, the chart deploys `meta/llama-3.1-8b-instruct` as the default NIM. |
 | nim.env | list | `[{"name":"NIM_PEFT_SOURCE","value":"http://nemo-entity-store:8000"},{"name":"NIM_PEFT_REFRESH_INTERVAL","value":"30"},{"name":"NIM_MAX_CPU_LORAS","value":"16"},{"name":"NIM_MAX_GPU_LORAS","value":"8"}]` | Environment variables for the NIM service. |
 | nim.image.repository | string | `"nvcr.io/nim/meta/llama-3.1-8b-instruct"` |  |
-| nim.image.tag | string | `"1.8.3"` |  |
+| nim.image.tag | string | `"1.8"` |  |
 | nim.imagePullSecrets[0].name | string | `"nvcrimagepullsecret"` |  |
 | nim.model.name | string | `"meta/llama-3.1-8b-instruct"` | The name of the model to deploy as NIM. |
 | nim.model.ngcAPISecret | string | `"ngc-api"` | The NGC API secret for model access. |
@@ -1213,6 +1306,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | nim.resources.requests | object | `{"nvidia.com/gpu":1}` | Specifies requests for the NIM service. |
 | nim.service.labels | object | `{"app.nvidia.com/nim-type":"inference"}` | Labels for the NIM service. |
 | nim.statefulSet.enabled | bool | `false` | Specifies whether to enable a stateful set for the NIM service. |
+| tags.auditor | bool | `false` | Specifies whether to install the NeMo Auditor microservice. |
 | tags.platform | bool | `true` | When set to `true`, installs all NeMo microservices. To install individual microservices, set `platform` to `false` and configure the `tags` key with values for each individual microservice. For more information, refer to [Tag-Based Installation](https://docs.nvidia.com/nemo/microservices/latest/set-up/deployment-options.html#tag-based-installation). |
 | virtualService | object | A virtual service configuration template. | Specifies whether to enable the virtual service. If you are not using istio and virtualservices, it can be useful to create some virtual services for the NeMo Microservices system. Don't enable unless you use istio. |
 | virtualService.additional.data-store | object | `{"entries":{"data-store":{"corsPolicy":{},"match":[{"uri":{"prefix":"/"}}],"route":[{"destination":{"host":"nemo-data-store","port":{"number":3000}}}]}},"gateways":[],"hosts":[]}` | Additional virtual service configurations. |
@@ -1230,6 +1324,9 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | virtualService.annotations | object | `{}` | Annotations for the virtual service. |
 | virtualService.enabled | bool | `false` | Specifies whether to enable the virtual service. |
 | virtualService.labels | object | `{}` | Labels for the virtual service. |
+| virtualService.main.entries.auditor.corsPolicy | object | `{}` | The CORS policy for the virtual NeMo Auditor service. |
+| virtualService.main.entries.auditor.match | list | `[{"uri":{"prefix":"/v1beta1/audit"}}]` | The match for the virtual NeMo Auditor service. |
+| virtualService.main.entries.auditor.route | list | `[{"destination":{"host":"nemo-auditor","port":{"number":5000}}}]` | The route for the virtual NeMo Auditor service. |
 | virtualService.main.entries.customizer.corsPolicy | object | `{}` | The CORS policy for the virtual NeMo Customizer service. |
 | virtualService.main.entries.customizer.match | list | `[{"uri":{"prefix":"/v1/customization"}}]` | The match for the virtual NeMo Customizer service. |
 | virtualService.main.entries.customizer.route | list | `[{"destination":{"host":"nemo-customizer","port":{"number":8000}}}]` | The route for the virtual NeMo Customizer service. |

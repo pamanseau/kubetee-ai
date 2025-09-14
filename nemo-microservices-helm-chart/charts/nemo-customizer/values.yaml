@@ -52,7 +52,6 @@ hfAPISecret: null
 # -- The key in the hfAPISecret containing the actual secret's value. Defaults to HF_TOKEN
 hfAPISecretKey: "HF_TOKEN"
 
-
 # -- A map of environment variables to inject into the NeMo Customizer app container.
 # Example:
 #
@@ -118,7 +117,6 @@ serviceAccount:
   annotations: {}
   # -- Automatically mount a ServiceAccount's API credentials.
   automountServiceAccountToken: true
-
 
 # -- Configure the PVC for models mount, where we store the parent/base models.
 modelsStorage:
@@ -324,7 +322,8 @@ ingress:
   hostname: ""
   # -- (list) A list of maps, each containing the keys `host` and `paths` for the ingress resource. You must specify a list for configuring ingress for the microservice.
   # @default -- []
-  hosts: {}
+  hosts:
+    {}
     # - host: ""
     #   paths:
     #     - path: /
@@ -386,10 +385,27 @@ useRunAIExecutor: false
 awsDeploy:
   # -- Switch on if using AWS and kyverno is installed
   enabled: false
-  # -- This deployment expects a homogoneous cluster, this is the number of GPUs per node. Multinode training will only occur when the whole node is reserved
-  gpusPerNode: 8
   # -- EFA number of devices per GPU
   efaDevicesPerGPU: 4
+# -- Deployment configurations for Azure
+azureDeploy:
+  # -- Switch on if using Azure and kyverno is installed
+  enabled: false
+  # -- RDMA number of devices per GPU
+  rdmaDevicesPerGPU: 2
+  # -- RDMA device name, examples include:
+  # - rdma_shared_device
+  # - rdma_shared_device_a
+  # - rdma_shared_device_b
+  rdmaDeviceName: rdma_shared_device_a
+gcpDeploy:
+  # -- Switch on if using GCP and kyverno is installed
+  enabled: false
+ociDeploy:
+  # -- Switch on if using OCI and kyverno is installed
+  enabled: false
+  # -- Number of RDMA networking resources to attach per node
+  rdmaDevicesPerGPU: 2
 # -- List of model configurations supported by the Customizer.
 # @default -- This object has the following default values.
 customizationTargets:
@@ -410,7 +426,7 @@ customizationTargets:
     # -- Llama 3.2 1B target model configuration.
     # @default -- This object has the following default values for the Llama 3.2 1B model.
     meta/llama-3.2-1b@2.0:
-     # -- The name for target model.
+      # -- The name for target model.
       name: llama-3.2-1b@2.0
       # -- The namespace for target model.
       namespace: meta
@@ -426,7 +442,6 @@ customizationTargets:
       num_parameters: 1000000000
       # -- Model precision format.
       precision: bf16-mixed
-
 
 # -- List of customization configuration template supported by the Customizer.
 # @default -- This object has the following default values.

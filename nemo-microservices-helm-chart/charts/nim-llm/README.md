@@ -45,42 +45,45 @@ See options below.
 
 ### Deployment parameters
 
-| Name                              | Description                                                                                                                                                                                  | Value   |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `affinity`                        | [default: {}] Affinity settings for deployment.                                                                                                                                              | `{}`    |
-| `containerSecurityContext`        | Sets privilege and access control settings for container (Only affects the main container, not pod-level).                                                                                   | `{}`    |
-| `customCommand`                   | Overrides command line options sent to the NIM with the array listed here.                                                                                                                   | `[]`    |
-| `customArgs`                      | Overrides command line arguments of the NIM container with the array listed here.                                                                                                            | `[]`    |
-| `env`                             | Adds arbitrary environment variables to the main container.                                                                                                                                  | `[]`    |
-| `extraVolumes`                    | Adds arbitrary additional volumes to the deployment set definition.                                                                                                                          | `{}`    |
-| `extraVolumeMounts`               | Adds volume mounts to the main container from `extraVolumes`.                                                                                                                                | `{}`    |
-| `image.repository`                | Specifies the NIM-LLM Image to deploy.                                                                                                                                                       | `""`    |
-| `image.tag`                       | Specifies the image tag or version.                                                                                                                                                          | `""`    |
-| `image.pullPolicy`                | Sets the image pull policy.                                                                                                                                                                  | `""`    |
-| `imagePullSecrets`                | Specifies a list of secret names that are needed for the main container and any init containers.                                                                                             |         |
-| `initContainers`                  | Specifies model init containers, if needed.                                                                                                                                                  |         |
-| `initContainers.ngcInit`          | Legacy containers only. Instantiate and configure an NGC init container. It should either have NGC CLI pre-installed or `wget` + `unzip` pre-installed -- must not be `musl`-based (alpine). | `{}`    |
-| `initContainers.extraInit`        | Fully specify any additional init containers your use case requires.                                                                                                                         | `[]`    |
-| `healthPort`                      | Specifies health check port. -- for use with `models.legacyCompat` only since current NIMs have no separate port.                                                                            | `8000`  |
-| `nodeSelector`                    | Sets node selectors for the NIM -- for example `nvidia.com/gpu.present: "true"`.                                                                                                             | `{}`    |
-| `podAnnotations`                  | Sets additional annotations on the main deployment pods.                                                                                                                                     | `{}`    |
-| `podSecurityContext`              | Specifies security context settings for pod.                                                                                                                                                 |         |
-| `podSecurityContext.runAsUser`    | Specify user UID for pod.                                                                                                                                                                    | `1000`  |
-| `podSecurityContext.runAsGroup`   | Specify group ID for pod.                                                                                                                                                                    | `1000`  |
-| `podSecurityContext.fsGroup`      | Specify file system owner group id.                                                                                                                                                          | `1000`  |
-| `replicaCount`                    | Specify static replica count for deployment.                                                                                                                                                 | `1`     |
-| `resources`                       | Specify resources limits and requests for the running service.                                                                                                                               |         |
-| `resources.limits.nvidia.com/gpu` | Specify number of GPUs to present to the running service.                                                                                                                                    | `1`     |
-| `serviceAccount.create`           | Specifies whether a service account should be created.                                                                                                                                       | `false` |
-| `serviceAccount.annotations`      | Sets annotations to be added to the service account.                                                                                                                                         | `{}`    |
-| `serviceAccount.name`             | Specifies the name of the service account to use. If it is not set and create is `true`, a name is generated using a `fullname` template.                                                    | `""`    |
-| `statefulSet.enabled`             | Enables `statefulset` deployment. Enabling `statefulSet` allows PVC templates for scaling. If using central PVC with RWX `accessMode`, this isn't needed.                                    | `true`  |
-| `tolerations`                     | Specify tolerations for pod assignment. Allows the scheduler to schedule pods with matching taints.                                                                                          |         |
+| Name                              | Description                                                                                                                                                   | Value   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `affinity`                        | [default: {}] Affinity settings for deployment.                                                                                                               | `{}`    |
+| `containerSecurityContext`        | Sets privilege and access control settings for container (Only affects the main container, not pod-level).                                                    | `{}`    |
+| `customCommand`                   | Overrides command line options sent to the NIM with the array listed here.                                                                                    | `[]`    |
+| `customArgs`                      | Overrides command line arguments of the NIM container with the array listed here.                                                                             | `[]`    |
+| `env`                             | Adds arbitrary environment variables to the main container.                                                                                                   | `[]`    |
+| `extraVolumes`                    | Adds arbitrary additional volumes to the deployment set definition.                                                                                           | `{}`    |
+| `extraVolumeMounts`               | Adds volume mounts to the main container from `extraVolumes`.                                                                                                 | `{}`    |
+| `image.repository`                | Specifies the NIM-LLM Image to deploy.                                                                                                                        | `""`    |
+| `image.tag`                       | Specifies the image tag or version.                                                                                                                           | `""`    |
+| `image.pullPolicy`                | Sets the image pull policy.                                                                                                                                   | `""`    |
+| `imagePullSecrets`                | Specifies a list of secret names that are needed for the main container and any init containers.                                                              |         |
+| `initContainers`                  | Specifies model init containers, if needed.                                                                                                                   |         |
+| `initContainers.extraInit`        | Fully specify any additional init containers your use case requires.                                                                                          | `[]`    |
+| `nodeSelector`                    | Sets node selectors for the NIM -- for example `nvidia.com/gpu.present: "true"`.                                                                              | `{}`    |
+| `podAnnotations`                  | Sets additional annotations on the main deployment pods.                                                                                                      | `{}`    |
+| `podSecurityContext`              | Specifies security context settings for pod.                                                                                                                  |         |
+| `podSecurityContext.runAsUser`    | Specify user UID for pod.                                                                                                                                     | `1000`  |
+| `podSecurityContext.runAsGroup`   | Specify group ID for pod.                                                                                                                                     | `1000`  |
+| `podSecurityContext.fsGroup`      | Specify file system owner group id.                                                                                                                           | `1000`  |
+| `proxyCA`                         | Specify a certificate for a custom proxy. When `proxyCA` is set native TLS is used for downloading from NGC.                                                  |         |
+| `proxyCA.enabled`                 | Specify true if NIM is run behind a proxy.                                                                                                                    | `false` |
+| `proxyCA.secretName`              | Specify a name of the Kubernetes secret containing the certificate. The secret is created before the deployment. Must be used together with `proxyCA.keyName` | `""`    |
+| `proxyCA.keyName`                 | Specify a name of the key inside the secret which contains the certificate. Must be used together with `proxyCA.secretName`                                   | `""`    |
+| `replicaCount`                    | Specify static replica count for deployment.                                                                                                                  | `1`     |
+| `resources`                       | Specify resources limits and requests for the running service.                                                                                                |         |
+| `resources.limits.nvidia.com/gpu` | Specify number of GPUs to present to the running service.                                                                                                     | `1`     |
+| `serviceAccount`                  | Options to specify service account for the deployment.                                                                                                        |         |
+| `serviceAccount.create`           | Specifies whether a service account should be created.                                                                                                        | `false` |
+| `serviceAccount.annotations`      | Sets annotations to be added to the service account.                                                                                                          | `{}`    |
+| `serviceAccount.name`             | Specifies the name of the service account to use. If it is not set and create is `true`, a name is generated using a `fullname` template.                     | `""`    |
+| `statefulSet.enabled`             | Enables `statefulset` deployment. Enabling `statefulSet` allows PVC templates for scaling. If using central PVC with RWX `accessMode`, this isn't needed.     | `true`  |
+| `tolerations`                     | Specify tolerations for pod assignment. Allows the scheduler to schedule pods with matching taints.                                                           |         |
 
 ### Autoscaling parameters
 
 Values used for creating a `Horizontal Pod Autoscaler`. If autoscaling is not enabled, the rest are ignored.
-NVIDIA recommends usage of the custom metrics API, commonly implemented with the prometheus-adapter.
+NVIDIA recommends usage of the custom metrics API, commonly implemented with the Prometheus Adapter.
 Standard metrics of CPU and memory are of limited use in scaling NIM.
 
 | Name                      | Description                               | Value   |
@@ -134,41 +137,32 @@ Standard metrics of CPU and memory are of limited use in scaling NIM.
 
 ### Metrics parameters
 
-| Name                                      | Description                                                                                                  | Value   |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------- |
-| `metrics`                                 | Opens the metrics port for the triton inference server on port 8002.                                         |         |
-| `metrics.enabled`                         | Enables metrics endpoint -- for `legacyCompat` only since current NIMs serve metrics on the OpenAI API port. | `true`  |
-| `serviceMonitor`                          | Options for `serviceMonitor` to use the Prometheus Operator and the primary service object.                  |         |
-| `metrics.serviceMonitor.enabled`          | Enables `serviceMonitor` creation.                                                                           | `false` |
-| `metrics.serviceMonitor.additionalLabels` | Specify additional labels for ServiceMonitor.                                                                | `{}`    |
+| Name                                      | Description                                                                                 | Value   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------- | ------- |
+| `metrics`                                 |                                                                                             |         |
+| `metrics.serviceMonitor`                  | Options for `serviceMonitor` to use the Prometheus Operator and the primary service object. |         |
+| `metrics.serviceMonitor.enabled`          | Enables `serviceMonitor` creation.                                                          | `false` |
+| `metrics.serviceMonitor.additionalLabels` | Specify additional labels for `serviceMonitor`.                                             | `{}`    |
 
 ### Models parameters
 
-| Name                 | Description                                                                                                                                                                                                                                                                                                                | Value                     |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `model.nimCache`     | Path to mount writeable storage or pre-filled model cache for the NIM.                                                                                                                                                                                                                                                     | `""`                      |
-| `model.name`         | Specifies the name of the model in the API (usually, the name of the NIM). This is mostly used for helm tests and is usually otherwise optional. This must match the name from _/v1/models_ to allow `helm test <release-name>` to work. In `legacyCompat`, this is required and sets the name of the model in /v1/models. | `meta/llama3-8b-instruct` |
-| `model.ngcAPISecret` | Name of pre-existing secret with a key named `NGC_API_KEY` that contains an API key for NGC model downloads.                                                                                                                                                                                                               | `""`                      |
-| `model.ngcAPIKey`    | NGC API key literal to use as the API secret and image pull secret when set.                                                                                                                                                                                                                                               | `""`                      |
-| `model.openaiPort`   | Specifies the Open AI API Port.                                                                                                                                                                                                                                                                                            | `8000`                    |
-| `model.labels`       | Specifies extra labels to be added on deployed pods.                                                                                                                                                                                                                                                                       | `{}`                      |
-| `model.jsonLogging`  | Turn JSON lines logging on or off. Defaults to true.                                                                                                                                                                                                                                                                       | `true`                    |
-| `model.logLevel`     | Log level of NIM service. Possible values of the variable are TRACE, DEBUG, INFO, WARNING, ERROR, CRITICAL.                                                                                                                                                                                                                | `INFO`                    |
-
-### Deprecated and Legacy Model parameters
-
-| Name                   | Description                                                                                                                                             | Value         |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `model.legacyCompat`   | Set `true` to enable compatibility with pre-release NIM versions prior to 1.0.0.                                                                        | `false`       |
-| `model.numGpus`        | (deprecated) Specify GPU requirements for the model.                                                                                                    | `1`           |
-| `model.subPath`        | (deprecated) Specify path within the model volume to mount if not the root -- default works with `ngcInit` and persistent volume. (`legacyCompat` only) | `model-store` |
-| `model.modelStorePath` | (deprecated) Specify location of unpacked model.                                                                                                        | `""`          |
+| Name                  | Description                                                                                                                                                                                                                              | Value                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `model.nimCache`      | Path to mount writeable storage or pre-filled model cache for the NIM.                                                                                                                                                                   | `""`                      |
+| `model.name`          | Specifies the name of the model in the API (usually, the name of the NIM). This is mostly used for helm tests and is usually otherwise optional. This must match the name from _/v1/models_ to allow `helm test <release-name>` to work. | `meta/llama3-8b-instruct` |
+| `model.ngcAPISecret`  | Name of pre-existing secret with a key named `NGC_API_KEY` that contains an API key for NGC model downloads.                                                                                                                             | `""`                      |
+| `model.ngcAPIKey`     | NGC API key literal to use as the API secret and image pull secret when set.                                                                                                                                                             | `""`                      |
+| `model.hfTokenSecret` | Name of pre-existing secret with a key named `HF_TOKEN` that contains a token for HuggingFace model downloads.                                                                                                                           | `""`                      |
+| `model.openaiPort`    | Specifies the Open AI API Port.                                                                                                                                                                                                          | `8000`                    |
+| `model.labels`        | Specifies extra labels to be added on deployed pods.                                                                                                                                                                                     | `{}`                      |
+| `model.jsonLogging`   | Turn JSON lines logging on or off. Defaults to true.                                                                                                                                                                                     | `true`                    |
+| `model.logLevel`      | Log level of NIM service. Possible values of the variable are TRACE, DEBUG, INFO, WARNING, ERROR, CRITICAL.                                                                                                                              | `INFO`                    |
 
 ### Storage parameters
 
 | Name                                                              | Description                                                                                                                                                                                                                                   | Value                    |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `persistence`                                                     | Specify settings to modify the path `/model-store` if `model.legacyCompat` is enabled else `/.cache` volume where the model is served from.                                                                                                   |                          |
+| `persistence`                                                     | Specify settings to modify the behavior and use of persistent volumes for model weights.                                                                                                                                                      |                          |
 | `persistence.enabled`                                             | Enables the use of persistent volumes.                                                                                                                                                                                                        | `false`                  |
 | `persistence.existingClaim`                                       | Specifies an existing persistent volume claim. If using `existingClaim`, run only one replica or use a `ReadWriteMany` storage setup.                                                                                                         | `""`                     |
 | `persistence.storageClass`                                        | Specifies the persistent volume storage class. If set to `"-"`, this disables dynamic provisioning. If left undefined or set to null, the cluster default storage provisioner is used.                                                        | `""`                     |
@@ -199,21 +193,22 @@ Standard metrics of CPU and memory are of limited use in scaling NIM.
 ### Multi-node parameters
 
 Large models that must span multiple nodes do not work on plain Kubernetes with the GPU Operator alone at this time.
-Optimized TensorRT profiles, when selected automatically or by environment variable, require either
-[LeaderWorkerSets](https://github.com/kubernetes-sigs/lws) or the [MPI Operator]](https://github.com/kubeflow/mpi-operator)'s `MPIJobs` to be installed.
-Since `MPIJob` is a batch-type resource that is not designed with service stability and reliability in mind, you should use LeaderWorkerSets if your cluster version allows it.
+Optimized TensorRT profiles, when selected automatically or by environment variable, require one of the following:
+
+- (Recommended) [LeaderWorkerSets](https://github.com/kubernetes-sigs/lws)—We recommend that you use LeaderWorkerSets if your cluster version allows it.
+- (Not recommended) [MPI Operator](https://github.com/kubeflow/mpi-operator)—Since `MPIJob` is a batch-type resource that is not designed with service stability and reliability in mind, this option is not recommended.
 Only optimized profiles are supported for multi-node deployment at this time.
 
 | Name                                 | Description                                                                                                                                                                     | Value   |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `multiNode.enabled`                  | Enables multi-node deployments.                                                                                                                                                 | `false` |
-| `multiNode.clusterStartTimeout`      | Sets the number of seconds to wait for worker nodes to come up before failing.                                                                                                  | `300`   |
-| `multiNode.gpusPerNode`              | Number of GPUs that will be presented to each pod. In most cases, this should match `resources.limits.nvidia.com/gpu`.                                                          | `1`     |
+| `multiNode.enabled`                  | Specify true for multi-node deployments.                                                                                                                                        | `false` |
+| `multiNode.clusterStartTimeout`      | Set the number of seconds to wait for worker nodes to start before failing.                                                                                                     | `300`   |
+| `multiNode.gpusPerNode`              | Number of GPUs for each pod. In most cases, this should match `resources.limits.nvidia.com/gpu`.                                                                                | `1`     |
 | `multiNode.workers`                  | Specifies how many worker pods per multi-node replica to launch.                                                                                                                | `1`     |
 | `multiNode.workerCustomCommand`      | Sets a custom command array for the worker nodes in a LeaderWorkerSet only.                                                                                                     | `[]`    |
-| `multiNode.leaderWorkerSet.enabled`  | NVIDIA recommends you use `LeaderWorkerSets` to deploy. If disabled, defaults to using `MPIJob` from mpi-operator.                                                              | `true`  |
+| `multiNode.leaderWorkerSet.enabled`  | True to use `LeaderWorkerSets` for multi-node deployments (recommended). False to `MPIJob` from mpi-operator.                                                                   | `true`  |
 | `multiNode.existingSSHSecret`        | Sets the SSH private key for MPI to an existing secret. Otherwise, the Helm chart generates a key randomly during installation.                                                 | `""`    |
 | `multiNode.mpiJob.workerAnnotations` | Annotations only applied to workers for `MPIJob`, if used. This may be necessary to ensure the workers connect to `CNI`s offered by `multus` and the network operator, if used. | `{}`    |
 | `multiNode.mpiJob.launcherResources` | Resources section to apply only to the launcher pods in `MPIJob`, if used. Launchers do not get the chart resources restrictions. Only workers do, since they require GPUs.     | `{}`    |
-| `multiNode.optimized.enabled`        | Enables optimized multi-node deployments (currently the only option supported).                                                                                                 | `true`  |
+| `multiNode.optimized.enabled`        | True to enable optimized multi-node deployments. Currently, true is the only option.                                                                                            | `true`  |
 

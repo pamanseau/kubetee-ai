@@ -4,8 +4,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "nemo-kubernetes-operator.fullname" . }}
-  {{- if .Values.restrictedNamespace }}
-  namespace: {{ .Values.restrictedNamespace }}
+  {{- if not .Values.watchAllNamespaces }}
+  namespace: {{ .Release.Namespace }}
   {{- end }}
   labels:
     app.kubernetes.io/component: kube-rbac-proxy

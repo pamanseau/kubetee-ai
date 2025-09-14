@@ -6,6 +6,7 @@ data:
   init-container.yaml: |
     name: dataset-download-container
     image: {{ include "nemo-common.mainimage" . | quote }}
+    terminationMessagePolicy: FallbackToLogsOnError
     command: download-dataset-placeholder-command
     env:
       - name: NAMESPACE

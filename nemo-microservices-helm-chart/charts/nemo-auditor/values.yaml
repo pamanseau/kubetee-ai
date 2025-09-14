@@ -9,6 +9,7 @@ image:
 
 postgresql:
   enabled: true
+  nameOverride: auditdb
   auth:
     username: nemo
     password: nemo
@@ -21,6 +22,24 @@ postgresql:
   persistence:
     enabled: true
     size: 10Gi
+
+# -- External PostgreSQL configuration.
+externalDatabase:
+  # -- The database host.
+  host: ""
+  # -- The database port.
+  port: 5432
+  # -- The database user.
+  user: nemo
+  # -- The database name.
+  database: auditor
+  # -- The name of an existing secret to use for PostgreSQL credentials.
+  existingSecret: ""
+  # -- The name of an existing secret key to use for PostgreSQL credentials.
+  existingSecretPasswordKey: ""
+  uriSecret:
+    name: ""
+    key: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -127,9 +146,7 @@ autoscaling:
 
 
 # Environment variables to pass to containers. This is an object formatted like NAME: value or NAME: valueFrom: {object}
-env:
-  POSTGRES_URI: postgresql://nemo:nemo@nemo-auditor-postgresql:5432/auditor
-  CELERY_RESULT_BACKEND_URL: db+postgresql://nemo:nemo@nemo-auditor-postgresql:5432/auditor
+env: {}
 
 nodeSelector: {}
 
@@ -147,8 +164,3 @@ affinity: {}
 #   OPENAICOMPATIBLE_API_KEY: (base64 encoded api key)
 auditorApiKeysSecretName: auditor-api-keys
 
-# Extra environment variables from ConfigMaps
-extraEnvVarsCM: ""
-
-# Extra environment variables from Secrets
-extraEnvVarsSecret: ""

@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: "25.08"
+appVersion: "25.09"
 dependencies:
 - condition: postgresql.enabled
   name: postgresql
@@ -15,4 +15,4 @@ maintainers:
   url: https://www.nvidia.com
 name: nemo-guardrails
 type: application
-version: 25.8.0
+version: 25.9.0

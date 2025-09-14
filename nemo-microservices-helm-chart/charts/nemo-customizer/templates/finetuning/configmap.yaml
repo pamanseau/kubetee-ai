@@ -16,10 +16,15 @@ data:
       training:
         queue: "{{ .Values.customizerConfig.training.queue }}"
         image: "{{ include "nemo-common.mainimage" . }}"
+        {{- if .Values.gptOssImage }}
+        gptOssImage: "{{ .Values.gptOssImage.registry }}/{{ .Values.gptOssImage.repository }}:{{ default .Chart.AppVersion .Values.gptOssImage.tag }}"
+        {{- end }}
         imagePullSecrets:
           {{ include "nemo-common.imagepullsecrets" . | nindent 10 | trim }}
         pvc:
+          {{- if .Values.customizerConfig.training.pvc.storageClass }}
           storageClass: {{ .Values.customizerConfig.training.pvc.storageClass }}
+          {{- end }}
           size: {{ .Values.customizerConfig.training.pvc.size }}
           volumeAccessMode: {{ .Values.customizerConfig.training.pvc.volumeAccessMode }}
           name: {{ .Values.customizerConfig.training.pvc.name | toYaml }}

@@ -12,10 +12,13 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | apiImage.imagePullPolicy | string | `"IfNotPresent"` | Image pull policy for the NeMo Customizer API image. |
 | apiImage.registry | string | `"nvcr.io"` | Registry for the NeMo Customizer API image. |
 | apiImage.repository | string | `"nvidia/nemo-microservices/customizer-api"` | Repository for the NeMo Customizer API image. |
-| awsDeploy | object | `{"efaDevicesPerGPU":4,"enabled":false,"gpusPerNode":8}` | Deployment configurations for AWS |
+| awsDeploy | object | `{"efaDevicesPerGPU":4,"enabled":false}` | Deployment configurations for AWS |
 | awsDeploy.efaDevicesPerGPU | int | `4` | EFA number of devices per GPU |
 | awsDeploy.enabled | bool | `false` | Switch on if using AWS and kyverno is installed |
-| awsDeploy.gpusPerNode | int | `8` | This deployment expects a homogoneous cluster, this is the number of GPUs per node. Multinode training will only occur when the whole node is reserved |
+| azureDeploy | object | `{"enabled":false,"rdmaDeviceName":"rdma_shared_device_a","rdmaDevicesPerGPU":2}` | Deployment configurations for Azure |
+| azureDeploy.enabled | bool | `false` | Switch on if using Azure and kyverno is installed |
+| azureDeploy.rdmaDeviceName | string | `"rdma_shared_device_a"` | RDMA device name, examples include: - rdma_shared_device - rdma_shared_device_a - rdma_shared_device_b |
+| azureDeploy.rdmaDevicesPerGPU | int | `2` | RDMA number of devices per GPU |
 | customizationConfigTemplates | object | This object has the following default values. | List of customization configuration template supported by the Customizer. |
 | customizationConfigTemplates.overrideExistingTemplates | bool | `true` | Whether to have this values file override templates in the database on application start |
 | customizationConfigTemplates.templates | object | This object has the following default values. | The default templates to populate the database with |
@@ -87,6 +90,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | externalDatabase.port | int | `5432` | External database port number. |
 | externalDatabase.user | string | `"nemo"` | Non-root username for the NeMo Customizer microservice. |
 | fullnameOverride | string | `""` | String to fully override the chart and release name on resulting objects when deployed. |
+| gcpDeploy.enabled | bool | `false` | Switch on if using GCP and kyverno is installed |
 | hfAPISecret | string | `nil` | The K8s Secret containing the HuggingFace API token. |
 | hfAPISecretKey | string | `"HF_TOKEN"` | The key in the hfAPISecret containing the actual secret's value. Defaults to HF_TOKEN |
 | image | object | This object has the following default values for the NeMo Customizer microservice image. | NeMo Customizer image that supports training and standalone mode. |
@@ -123,6 +127,8 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | nemoDataStoreTools.tag | string | `""` | Tag for the NeMo Data Store tools image. |
 | ngcAPISecret | string | `"ngc-api"` | Secret used for auto hydrating the model cache from NGC for enabled models. |
 | ngcAPISecretKey | string | `"NGC_API_KEY"` | Key in the NGC API secret containing the API key. |
+| ociDeploy.enabled | bool | `false` | Switch on if using OCI and kyverno is installed |
+| ociDeploy.rdmaDevicesPerGPU | int | `2` | Number of RDMA networking resources to attach per node |
 | opentelemetry-collector | object | This object has the following default values for the Open Telemetry Collector configuration. | Open Telemetry Collector configuration. |
 | opentelemetry-collector.config | object | `{"exporters":{"debug":{"verbosity":"detailed"}},"extensions":{"health_check":{},"zpages":{"endpoint":"0.0.0.0:55679"}},"processors":{"batch":{}},"receivers":{"otlp":{"protocols":{"grpc":{},"http":{"cors":{"allowed_origins":["*"]}}}}},"service":{"extensions":["zpages","health_check"],"pipelines":{"logs":{"exporters":["debug"],"processors":["batch"],"receivers":["otlp"]},"metrics":{"exporters":["debug"],"processors":["batch"],"receivers":["otlp"]},"traces":{"exporters":["debug"],"processors":["batch"],"receivers":["otlp"]}}}}` | Base collector configuration for Open Telemetry Collector. |
 | opentelemetry-collector.enabled | bool | `true` | Switch to enable or disable Open Telemetry Collector. |

@@ -10,17 +10,11 @@ Reuseable init container for running Alembic DB migrations for Evaluator.
   {{- end }}
   imagePullPolicy: {{ .Values.image.pullPolicy }}
   env:
+    - name: MODE
+      value: standalone
     {{ include "nemo-common.postgresql.password" . | nindent 4 | trim }}
     - name: POSTGRES_URI
       {{ include "nemo-common.postgresql.uri" . | nindent 6 | trim }}
-    - name: DATA_STORE_URL
-      value: "{{ .Values.external.dataStore.endpoint }}"
-    - name: NAMESPACE
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.namespace
-    - name: EVAL_CONTAINER
-      value: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
     {{- if .Values.dbMigration.extraEnvVars }}
     {{- range $k, $v := .Values.dbMigration.extraEnvVars }}
     - name: "{{ $k }}"
@@ -28,9 +22,6 @@ Reuseable init container for running Alembic DB migrations for Evaluator.
     {{- end }}
     {{- end }}
     {{ include "nemo-common.env" . | nindent 4 | trim }}
-  envFrom:
-    - configMapRef:
-        name: evaluation-to-image-config
   {{- if or (.Values.dbMigration.extraEnvVarsCM) (.Values.dbMigration.extraEnvVarsSecret) }}
     {{- if .Values.dbMigration.extraEnvVarsCM }}
     - configMapRef:

@@ -4,4 +4,4 @@ description: A Helm chart for NVIDIA NIM for LLMs
 kubeVersion: '>=v1.23.0-0'
 name: nim-llm
 type: application
-version: 1.7.0-rc1
+version: 1.13.1

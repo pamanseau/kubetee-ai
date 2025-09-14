@@ -45,6 +45,8 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | podAnnotations | object | `{}` | Additional annotations for the NeMo Entity Store pods. |
 | podLabels | object | `{}` | Additional labels for the NeMo Entity Store pods. |
 | podSecurityContext | object | `{}` | The pod security context for the NeMo Entity Store pods. |
+| postgresWaitImage.repository | string | `"busybox"` | The repository location of the image used to wait for postgres to start. |
+| postgresWaitImage.tag | string | `"latest"` | The tag of the image used when waiting. |
 | postgresql.architecture | string | `"standalone"` | The PostgreSQL architecture. Available options are `standalone` or `replication`. |
 | postgresql.auth.database | string | `"entity-store"` | The name for a custom database to create. |
 | postgresql.auth.enablePostgresUser | bool | `true` | Whether to assign a password to the "postgres" admin user. If disabled, remote access is blocked for this user. |

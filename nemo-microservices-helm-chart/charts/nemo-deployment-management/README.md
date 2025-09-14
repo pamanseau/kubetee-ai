@@ -16,10 +16,10 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | dataStore.secret.create | bool | `true` | Whether to create a secret for the data store huggingface token. If false, the secret must be created manually. |
 | dataStore.secret.name | string | `"nemo-deployment-management-service-ds-hf-token"` | The name of the secret that will be created. If create is false, a secret with this name must be created manually and have the HF_TOKEN key set. |
 | dataStore.url | string | `"http://nemo-data-store:3000"` | The URL for the NeMo Data Store service. |
-| deployments | object | `{"autoscaling":{"enabled":false,"spec":{"maxReplicas":5,"metrics":[{"pods":{"metric":{"name":"gpu_cache_usage_perc"},"target":{"averageValue":"750m","type":"AverageValue"}},"type":"Pods"}],"minReplicas":1}},"defaultStorageClass":"","entityStoreUrl":"http://nemo-entity-store:8000","metrics":{"enabled":false},"modelPullerImage":"nvcr.io/nvidia/nemo-microservices/nds-v2-huggingface-cli:25.06","modelPullerPullSecret":"nvcrimagepullsecret","modelSyncPeriod":"30","nimImagePullSecrets":[],"nimPeftSource":"http://nemo-entity-store:8000","nimPvcSize":"25Gi"}` | Properties to configure NIM deployments for the NeMo Deployment Management microservice. |
+| deployments | object | `{"autoscaling":{"enabled":false,"spec":{"maxReplicas":5,"metrics":[{"pods":{"metric":{"name":"gpu_cache_usage_perc"},"target":{"averageValue":"750m","type":"AverageValue"}},"type":"Pods"}],"minReplicas":1}},"defaultStorageClass":"","entityStoreUrl":"http://nemo-entity-store:8000","metrics":{"enabled":false},"modelPullerImage":"nvcr.io/nvidia/nemo-microservices/nds-v2-huggingface-cli:25.06","modelPullerPullSecret":"nvcrimagepullsecret","modelSyncPeriod":"30","nimImagePullSecrets":[],"nimPeftSource":"http://nemo-entity-store:8000","nimPvcSize":"200Gi"}` | Properties to configure NIM deployments for the NeMo Deployment Management microservice. |
 | deployments.autoscaling.enabled | bool | `false` | Whether to enable autoscaling for the NIM deployments. |
 | deployments.autoscaling.spec | object | `{"maxReplicas":5,"metrics":[{"pods":{"metric":{"name":"gpu_cache_usage_perc"},"target":{"averageValue":"750m","type":"AverageValue"}},"type":"Pods"}],"minReplicas":1}` | Autoscaling specification for the NIM deployments. |
-| deployments.defaultStorageClass | string | `""` | The default storage class for NIM deployments. |
+| deployments.defaultStorageClass | string | `""` | Storage classes utilizing NFSv3+ may encounter issues with huggingface-cli file locking. |
 | deployments.entityStoreUrl | string | `"http://nemo-entity-store:8000"` | The URL for the NeMo Entity Store service. |
 | deployments.metrics.enabled | bool | `false` | Whether to enable metrics collection for the NIM deployments. |
 | deployments.modelPullerImage | string | `"nvcr.io/nvidia/nemo-microservices/nds-v2-huggingface-cli:25.06"` | The image to use for pulling models from NeMo Data Store. Must have the huggingface-cli binary installed. |
@@ -27,7 +27,7 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | deployments.modelSyncPeriod | string | `"30"` | The period in seconds for model synchronization. |
 | deployments.nimImagePullSecrets | list | `[]` | List of image pull secrets for the NIM deployments. |
 | deployments.nimPeftSource | string | `"http://nemo-entity-store:8000"` | The URL for PEFT model sources (typically points to NeMo Entity Store) |
-| deployments.nimPvcSize | string | `"25Gi"` | The size of the PVC for the NIM deployments. |
+| deployments.nimPvcSize | string | `"200Gi"` | The size of the PVC for the NIM deployments. |
 | env | object | `{}` | Additional environment variables to pass to the NeMo Deployment Management microservice container. The format is `NAME: value` or `NAME: valueFrom: {object}`. |
 | fullnameOverride | string | `""` | String to fully override the name on resulting Kubernetes objects when the NeMo Deployment Management microservice is deployed. |
 | image.pullPolicy | string | `"IfNotPresent"` | The container image pull policy for the NeMo Deployment Management container. |

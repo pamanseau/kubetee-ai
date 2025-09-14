@@ -135,7 +135,7 @@ livenessProbe:
 {{- if eq .method "http" }}
   httpGet:
     path: {{ .path }}
-    port: {{ $.Values.model.legacyCompat | ternary "health" "http-openai" }}
+    port: "http-openai"
 {{- else if eq .method "script" }}
   exec:
     command:
@@ -153,7 +153,7 @@ livenessProbe:
 readinessProbe:
   httpGet:
     path: {{ .path }}
-    port: {{ $.Values.model.legacyCompat | ternary "health" "http-openai" }}
+    port: "http-openai"
   initialDelaySeconds: {{ .initialDelaySeconds }}
   periodSeconds: {{ .periodSeconds }}
   timeoutSeconds: {{ .timeoutSeconds }}
@@ -166,7 +166,7 @@ readinessProbe:
 startupProbe:
   httpGet:
     path: {{ .path }}
-    port: {{ $.Values.model.legacyCompat | ternary "health" "http-openai" }}
+    port: "http-openai"
   initialDelaySeconds: {{ .initialDelaySeconds }}
   periodSeconds: {{ .periodSeconds }}
   timeoutSeconds: {{ .timeoutSeconds }}
@@ -177,33 +177,11 @@ startupProbe:
 {{- end }}
 
 {{/*
-Define the container ports for NIMs using either legacy triton or current backends
+Define the container ports for NIM
 */}}
 {{- define "nim-llm.ports" -}}
-{{- if .Values.model.legacyCompat }}
-- containerPort: 8000
-  name: http
-{{- end }}
-{{- if and .Values.healthPort .Values.model.legacyCompat }}
-- containerPort: {{ .Values.healthPort }}
-  name: health
-{{- end }}
-{{- if .Values.service.grpc_port }}
-- containerPort: 8001
-  name: grpc
-{{- end }}
-{{- if and .Values.metrics.enabled .Values.model.legacyCompat }}
-- containerPort: 8002
-  name: metrics
-{{- end }}
-{{- if or .Values.model.openaiPort .Values.model.openai_port }}
 - containerPort: {{ .Values.model.openai_port | default .Values.model.openaiPort }}
   name: http-openai
-{{- end }}
-{{- if or .Values.model.nemoPort .Values.model.nemo_port }}
-- containerPort: {{ .Values.model.nemoPort | default .Values.model.nemo_port }}
-  name: http-nemo
-{{- end }}
 {{- end }}
 
 {{/*
@@ -211,16 +189,16 @@ Define volume mounts for every nim hosting definition
 */}}
 {{- define "nim-llm.volumeMounts" -}}
 - name: model-store
-  {{- if .Values.model.legacyCompat }}
   mountPath: {{ .Values.model.nimCache }}
-  subPath: {{ .Values.model.subPath }}
-  {{- else }}
-  mountPath: {{ .Values.model.nimCache }}
-  {{- end }}
 - mountPath: /dev/shm
   name: dshm
 - name: scripts-volume
   mountPath: /scripts
+{{- if .Values.proxyCA.enabled }}
+- name: proxy-ca
+  mountPath: /opt/nim/proxy-ca
+  subPath: {{ .Values.proxyCA.keyName }}
+{{- end}}
 {{- if .Values.extraVolumeMounts }}
 {{- range $k, $v := .Values.extraVolumeMounts }}
 - name: {{ $k }}

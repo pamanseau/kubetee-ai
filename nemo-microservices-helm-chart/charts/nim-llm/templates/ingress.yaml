@@ -1,7 +1,6 @@
 ---
 {{ if .Values.ingress.enabled }}
 {{- $fullName := include "nim-llm.fullname" . -}}
-{{- $nemoPort := .Values.service.nemo_port -}}
 {{- $openaiPort := .Values.service.openaiPort | default .Values.service.openai_port -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
@@ -50,13 +49,9 @@ spec:
             {{- end }}
             backend:
               service:
-                name: "{{ $fullName }}-{{ .serviceType }}"
+                name: "{{ $fullName }}"
                 port:
-                  {{- if eq .serviceType "nemo" }}
-                  number: {{ $nemoPort }}
-                  {{- else if eq .serviceType "openai" }}
                   number: {{ $openaiPort }}
-                  {{- end }}
           {{- end }}
     {{- end }}
 {{ end }}

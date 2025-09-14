@@ -99,64 +99,10 @@ spec:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if or .Values.customCommand .Values.model.legacyCompat }}
+          {{- if or .Values.customCommand }}
           command:
-            {{- if .Values.customCommand }}
             {{- range .Values.customCommand }}
              - {{ . | quote }}
-            {{- end }}
-            {{- else }}
-            - nemollm_inference_ms
-            - --model_name
-            - {{ .Values.model.name | quote }}
-            - --num_gpus
-            - {{ .Values.model.numGpus | quote }}
-            {{- if .Values.model.nemo_port }}
-            - --nemo_port
-            - {{ .Values.model.nemo_port | quote }}
-            {{- end }}
-            - --openai_port
-            - {{ .Values.model.openai_port | default .Values.model.openaiPort | quote }}
-            {{- if .Values.model.openai_host }}
-            - --host
-            - {{ .Values.model.openai_host | quote }}
-            {{- end }}
-            {{- if .Values.healthPort }}
-            - --health_port
-            - {{ .Values.healthPort | quote }}
-            {{- end }}
-            {{- if .Values.model.numWorkers }}
-            - --num_workers
-            - {{ .Values.model.numWorkers | quote }}
-            {{- end }}
-            {{- if .Values.model.logLevel }}
-            - --log_level
-            - {{ .Values.model.logLevel | quote }}
-            {{- end }}
-            {{- if .Values.model.tritonURL }}
-            - --triton_url
-            - {{ .Values.model.tritonURL | quote }}
-            {{- end }}
-            {{- if .Values.model.tritonModelName }}
-            - --triton_model_name
-            - {{ .Values.model.tritonModelName | quote }}
-            {{- end }}
-            {{- if .Values.model.trtModelName }}
-            - --trt_model_name
-            - {{ .Values.model.trtModelName | quote }}
-            {{- end }}
-            {{- if .Values.model.customizationSource }}
-            - --customization_source
-            - {{ .Values.model.customizationSource | quote }}
-            {{- end }}
-            {{- if .Values.model.dataStoreURL }}
-            - --data_store_url
-            - {{ .Values.model.dataStoreURL | quote }}
-            {{- end }}
-            {{- if .Values.model.modelStorePath }}
-            - --model_store_path
-            - {{ .Values.model.modelStorePath | quote }}
-            {{- end }}
             {{- end }}
           {{- end }}
           {{- if .Values.customArgs }}
@@ -175,6 +121,13 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.model.ngcAPISecret }}
                   key: NGC_API_KEY
+            {{- if .Values.model.hfTokenSecret }}
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.model.hfTokenSecret }}
+                  key: HF_TOKEN
+            {{- end }}
             - name: OUTLINES_CACHE_DIR
               value: /tmp/outlines
             - name: NIM_SERVER_PORT
@@ -183,6 +136,10 @@ spec:
               value: {{ ternary "1" "0" .Values.model.jsonLogging | quote }}
             - name: NIM_LOG_LEVEL
               value: {{ .Values.model.logLevel | quote }}
+            {{- if .Values.proxyCA.enabled }}
+            - name: SSL_CERT_FILE
+              value: /opt/nim/proxy-ca
+            {{- end }}
             {{- if .Values.env }}
             {{- toYaml .Values.env | nindent 12 }}
             {{- end }}
@@ -214,6 +171,11 @@ spec:
           configMap:
             name: {{ include "nim-llm.fullname" . }}-scripts-configmap
             defaultMode: 0555
+        {{- if .Values.proxyCA.enabled }}
+        - name: proxy-ca
+          secret:
+            secretName: {{ .Values.proxyCA.secretName }}
+        {{- end }}
         {{- if not $pvcUsingTemplate }}
         - name: model-store
           {{- if .Values.persistence.enabled }}

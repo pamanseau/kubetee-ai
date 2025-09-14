@@ -1,16 +1,61 @@
-# KubeTEE AI Cluster
+# KubeTEE AI Multi Clusters
+
+
+## Host Cluster & Rancher UI Installation
+
+> The host cluster is the main cluster that will manage all the child clusters
+> Rancher is the main security and management for all the clusters and provide the access to project and namespaces
+>
+
+### K3S Cluster for simplicity and functionalities over distant data centers
+
+### Rancher UI Installation
+
+```sh
+helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
+
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+```
+
+```sh
+curl -o isrg-root-x1.pem https://letsencrypt.org/certs/isrgrootx1.pem
+kubectl create secret generic tls-ca-additional --from-file=cacerts.pem=isrg-root-x1.pem -n cattle-system
+```
+
+```sh
+helm upgrade --install rancher rancher-latest/rancher \
+  --namespace cattle-system \
+  --create-namespace \
+  --version 2.11.3 \
+  -f values-rancher-kubecon.yaml
+```
 
 ## K3S Rancher Installation
 
----
+> Child Clusters with K3S will not be FIFS certified
 
 ## RK2 Rancher Installation
 
----
+> Child Clusters should have RKE2 for FIFS certification. Control-plane and workers should be located in the same REGION with differnet Zones for redundancy
+>
+> - USA East Virginia EAST-1
+>   - Zone A, B, C, D, E, F
+>
+> - USA East Virginia EAST-2
+>   - Zone A, B, C
+> 
+> - Amsterdam [AMS]
+>   - AMS1
+>   - AMS2
+
+*TODO*:
+  - [] Establish the Continent, Regions, Zones standard and labeling
+  - [] Deploy a cluster discovery pod that will label the cluster for Karmada
+
 
 ## LONGHORN Install from Rancher
 
-> Install Network Operator with Milvus and Whereabouts for using private LAN for efficiency
+> [!NOTE] Install Network Operator with Milvus and Whereabouts for using private LAN for efficiency
 
 ```sh
 helm upgrade --install longhorn longhorn/longhorn -n longhorn --create-namespace --version 1.9.1 -f values-longhorn-1.9.1.yaml
@@ -43,14 +88,10 @@ helm upgrade --install longhorn longhorn/longhorn -n longhorn --create-namespace
 - Create `retain-single` class
   - replicas: 1
 
-
----
-
 ## Docker Registery Secrets
 
 regcred
 
----
 
 ## GPU NVIDIA
 
@@ -58,10 +99,8 @@ Install the NVIDIA Operator [Documentation](https://docs.nvidia.com/datacenter/c
 
 Configure [Multi-Instances](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-operator-mig.html) and [Time-Slicing](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-sharing.html)
 
-### CC and Kata pre-requis
 
-
-#### Confidential Container Operator
+### Confidential Container Operator
 
 Create Namespace
 ```sh
@@ -81,6 +120,18 @@ kubectl apply -f manifests/rancher-cc-permissions.yaml
 ```sh
 export RELEASE_VERSION=v0.15.0          
 kubectl apply -k "github.com/confidential-containers/operator/config/release?ref=${RELEASE_VERSION}"
+```
+
+### Kata Container Operator Helm deployment
+
+> [!WARNING]
+> Branch used to stage new development
+
+```sh
+helm upgrade --install kata-deploy \
+  --namespace kube-system \
+  kata-containers/tools/packaging/kata-deploy/helm-chart/kata-deploy \
+  -f kata-containers/tools/packaging/kata-deploy/helm-chart/kata-deploy/values-k3s.yaml
 ```
 
 ### Helm Network Operator
@@ -107,6 +158,7 @@ kubectl describe nicclusterpolicy nic-cluster-policy
 ```
 
 ### Helm GPU-Operator
+
 ```sh
 kubectl create ns gpu-operator
 kubectl label --overwrite ns gpu-operator pod-security.kubernetes.io/enforce=privileged
@@ -119,6 +171,7 @@ kubectl get nodes -o json | jq '.items[].metadata.labels | keys | any(startswith
 ```
 
 - [] TODO: Version 25.3.3 ENV Variable [Issue #1694](https://github.com/NVIDIA/gpu-operator/issues/1694)
+
 ```sh
 helm upgrade --install gpu-operator nvidia/gpu-operator --version 25.3.2 -n gpu-operator --create-namespace  -f values-gpu-operator-staging.yaml
 ```
@@ -148,7 +201,7 @@ helm upgrade --install cert-manager jetstack/cert-manager --version v1.18.2  --n
 >
 > If you would like to further restrict the API permissions to a specific zone (or zones), you also need to use the `zoneIdFilters` so that the underlying API requests only access the zones that you explicitly specify, as opposed to accessing all zones.
 >
-> Change the `txtOwnerId: "sn15"` in the values-external-dns.yaml
+> Change the `txtOwnerId: "kubetee"` in the values-external-dns.yaml
 
 ```sh
 helm upgrade --install external-dns bitnami/external-dns --version 9.0.2 --namespace kube-system -f values-external-dns-[cluster].yaml
@@ -159,29 +212,6 @@ helm upgrade --install external-dns bitnami/external-dns --version 9.0.2 --names
 ```sh
 kubectl apply -f manifests/secret-cloudflare.yaml
 kubectl apply -f manifests/cert-manager-ClusterIssuer.yaml
-```
-
----
-
-## Rancher UI Installation
-
-```sh
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
-
-helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
-```
-
-```sh
-curl -o isrg-root-x1.pem https://letsencrypt.org/certs/isrgrootx1.pem
-kubectl create secret generic tls-ca-additional --from-file=cacerts.pem=isrg-root-x1.pem -n cattle-system
-```
-
-```sh
-helm upgrade --install rancher rancher-latest/rancher \
-  --namespace cattle-system \
-  --create-namespace \
-  --version 2.11.3 \
-  -f values-rancher-kubecon.yaml
 ```
 
 ## Kube Prometheus Stack with Grakafa

@@ -152,6 +152,7 @@ dataStore:
 # -- Properties to configure NIM deployments for the NeMo Deployment Management microservice.
 deployments:
   # -- The default storage class for NIM deployments.
+  # -- Storage classes utilizing NFSv3+ may encounter issues with huggingface-cli file locking.
   defaultStorageClass: ""
   # -- The URL for PEFT model sources (typically points to NeMo Entity Store)
   nimPeftSource: http://nemo-entity-store:8000
@@ -163,7 +164,7 @@ deployments:
     # -- Whether to enable metrics collection for the NIM deployments.
     enabled: false
   # -- The size of the PVC for the NIM deployments.
-  nimPvcSize: 25Gi
+  nimPvcSize: 200Gi
   # -- The image to use for pulling models from NeMo Data Store. Must have the huggingface-cli binary installed.
   modelPullerImage: nvcr.io/nvidia/nemo-microservices/nds-v2-huggingface-cli:25.06
   # -- The pull secret used to pull the model puller image.

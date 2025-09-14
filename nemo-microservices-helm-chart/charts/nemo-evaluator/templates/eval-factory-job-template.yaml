@@ -36,6 +36,7 @@ data:
                 mountPath: /configs
           - name: eval-results-handler-container
             image: {{ include "nemo-common.mainimage" . | quote }}
+            terminationMessagePolicy: FallbackToLogsOnError
             command: results-handler-placeholder-command
             env:
               - name: NAMESPACE

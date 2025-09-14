@@ -49,8 +49,8 @@ spec:
         {{- if .Values.controllerManager.manager.scheduler }}
           - --scheduler={{ .Values.controllerManager.manager.scheduler }}
         {{- end }}
-        {{- if .Values.restrictedNamespace }}
-          - --restrictedNamespace={{ .Values.restrictedNamespace }}
+        {{- if not .Values.watchAllNamespaces }}
+          - --restrictedNamespace={{ .Release.Namespace }}
         {{- end }}
         command:
         - /manager

@@ -90,6 +90,8 @@ For deployment guide, see [Admin Setup](https://docs.nvidia.com/nemo/microservic
 | podAnnotations | object | `{}` | Annotations for the service pod. |
 | podLabels | object | `{}` | Labels for the service pod. |
 | podSecurityContext | object | `{}` | Security context for the service pod. |
+| postgresWaitImage.repository | string | `"busybox"` | The repository location of the image used to wait for postgres to start. |
+| postgresWaitImage.tag | string | `"latest"` | The tag of the image used when waiting. |
 | postgresql.architecture | string | `"standalone"` | The architecture for the default PostgreSQL service. |
 | postgresql.auth.database | string | `"evaluation"` | The database for the PostgreSQL service. |
 | postgresql.auth.enablePostgresUser | bool | `true` | Whether to enable the PostgreSQL user. |

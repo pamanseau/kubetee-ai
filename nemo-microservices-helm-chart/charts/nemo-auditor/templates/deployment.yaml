@@ -35,21 +35,24 @@ spec:
           image: {{ include "nemo-common.mainimage" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            {{- if .Values.environment }}
-            {{ toYaml .Values.environment | nindent 12 }}
+            {{- if or .Values.postgresql.enabled .Values.externalDatabase.host .Values.externalDatabase.uriSecret.name }}
+            {{ include "nemo-common.postgresql.password" . | nindent 12 | trim }}
+            - name: POSTGRES_URI
+              {{ include "nemo-common.postgresql.uri" . | nindent 14 | trim }}
+            - name: CELERY_RESULT_BACKEND_URL
+              {{ include "nemo-common.postgresql.uri" . | replace "postgresql://" "db+postgresql://" | nindent 14 | trim }}
+            {{- end }}
+            {{- if .Values.auditorApiKeysSecretName }}
+            - name: NIM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auditorApiKeysSecretName }}
+                  key: NIM_API_KEY
+            {{- else }}
+            - name: NIM_API_KEY
+              value: NOT_SET
             {{- end }}
             {{ include "nemo-common.env" . | nindent 12 | trim }}
-          envFrom:
-            - secretRef:
-                name: {{ .Values.auditorApiKeysSecretName }}
-            {{- if .Values.extraEnvVarsCM }}
-            - configMapRef:
-                name: {{ include "common.tplvalues.render" (dict "value" .Values.extraEnvVarsCM "context" $) }}
-            {{- end }}
-            {{- if .Values.extraEnvVarsSecret }}
-            - secretRef:
-                name: {{ include "common.tplvalues.render" (dict "value" .Values.extraEnvVarsSecret "context" $) }}
-            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

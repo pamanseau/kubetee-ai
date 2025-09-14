@@ -15,31 +15,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    {{- if and .Values.model.legacyCompat .Values.service.http_port }}
-    - port: {{ .Values.service.http_port }}
-      targetPort: http
-      protocol: TCP
-      name: http
-    {{- end }}
-    {{- if and .Values.model.legacyCompat .Values.service.grpc_port }}
-    - port: {{ .Values.service.grpc_port }}
-      targetPort: grpc
-      protocol: TCP
-      name: grpc
-    {{- end }}
-    {{- if and .Values.model.legacyCompat .Values.metrics.enabled .Values.service.metrics_port }}
-    - port: {{ .Values.service.metrics_port }}
-      targetPort: metrics
-      name: metrics
-    {{- end }}
     - port: {{ .Values.service.openai_port | default .Values.service.openaiPort }}
       targetPort: http-openai
       name: http-openai
-    {{- if and .Values.model.legacyCompat .Values.model.nemo_port }}
-    - port: {{ .Values.service.nemo_port }}
-      targetPort: http-nemo
-      name: http-nemo
-    {{- end }}
   selector:
     {{- include "nim-llm.selectorLabels" . | nindent 4 }}
     {{- if .Values.multiNode.enabled }}
@@ -71,31 +49,9 @@ spec:
   type: ClusterIP
   clusterIP: None
   ports:
-    {{- if and .Values.model.legacyCompat .Values.service.http_port }}
-    - port: {{ .Values.service.http_port }}
-      targetPort: http
-      protocol: TCP
-      name: http
-    {{- end }}
-    {{- if and .Values.model.legacyCompat .Values.service.grpc_port }}
-    - port: {{ .Values.service.grpc_port }}
-      targetPort: grpc
-      protocol: TCP
-      name: grpc
-    {{- end }}
-    {{- if and .Values.model.legacyCompat .Values.metrics.enabled .Values.service.metrics_port }}
-    - port: {{ .Values.service.metrics_port }}
-      targetPort: metrics
-      name: metrics
-    {{- end }}
     - port: {{ .Values.service.openai_port | default .Values.service.openaiPort }}
       targetPort: http-openai
       name: http-openai
-    {{- if and .Values.model.legacyCompat .Values.model.nemo_port }}
-    - port: {{ .Values.service.nemo_port }}
-      targetPort: http-nemo
-      name: http-nemo
-    {{- end }}
   selector:
     {{- include "nim-llm.selectorLabels" . | nindent 4 }}
 {{- end }}
