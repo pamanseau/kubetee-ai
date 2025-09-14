@@ -101,6 +101,240 @@ spec:
                           items:
                             type: string
                           type: array
+                        draResources:
+                          description: DRAResources is the list of DRA resource claims
+                            to be used for the NIMService deployment or leader worker
+                            set.
+                          items:
+                            description: |-
+                              DRAResource references exactly one ResourceClaim, either directly
+                              or by naming a ResourceClaimTemplate which is then turned into a ResourceClaim.
+
+                              When creating the NIMService pods, it adds a name (`DNS_LABEL` format) to it
+                              that uniquely identifies the DRA resource.
+                            properties:
+                              claimCreationSpec:
+                                description: |-
+                                  ClaimCreationSpec is the spec to auto-generate a DRA resource claim template.
+                                  Only one of ClaimCreationSpec, ResourceClaimName or ResourceClaimTemplateName must be specified.
+                                properties:
+                                  devices:
+                                    items:
+                                      properties:
+                                        attributeSelectors:
+                                          description: AttributeSelectors defines
+                                            the criteria which must be satisfied by
+                                            the device attributes of a device.
+                                          items:
+                                            description: DRADeviceAttributeSelector
+                                              defines the selector expression for
+                                              a DRA device attribute.
+                                            properties:
+                                              key:
+                                                description: |-
+                                                  Key is the name of the device attribute.
+                                                  This is either a qualified name or a simple name.
+                                                  If it is a simple name, then it is assumed to be prefixed with the DRA driver name.
+                                                  Eg: "gpu.nvidia.com/productName" is equivalent to "productName" if the driver name is "gpu.nvidia.com". Otherwise they're treated as 2 different attributes.
+                                                maxLength: 64
+                                                type: string
+                                              op:
+                                                default: Equal
+                                                description: |-
+                                                  Op is the operator to use for comparing the device attribute value. Supported operators are:
+                                                  * Equal: The device attribute value must be equal to the value specified in the selector.
+                                                  * NotEqual: The device attribute value must not be equal to the value specified in the selector.
+                                                  * GreaterThan: The device attribute value must be greater than the value specified in the selector.
+                                                  * GreaterThanOrEqual: The device attribute value must be greater than or equal to the value specified in the selector.
+                                                  * LessThan: The device attribute value must be less than the value specified in the selector.
+                                                  * LessThanOrEqual: The device attribute value must be less than or equal to the value specified in the selector.
+                                                enum:
+                                                - Equal
+                                                - NotEqual
+                                                - GreaterThan
+                                                - GreaterThanOrEqual
+                                                - LessThan
+                                                - LessThanOrEqual
+                                                type: string
+                                              value:
+                                                description: Value is the value to
+                                                  compare against the device attribute.
+                                                properties:
+                                                  boolValue:
+                                                    description: BoolValue is a true/false
+                                                      value.
+                                                    type: boolean
+                                                  intValue:
+                                                    description: IntValue is a number.
+                                                    format: int32
+                                                    type: integer
+                                                  stringValue:
+                                                    description: StringValue is a
+                                                      string value.
+                                                    maxLength: 64
+                                                    type: string
+                                                  versionValue:
+                                                    description: VersionValue is a
+                                                      semantic version according to
+                                                      semver.org spec 2.0.0.
+                                                    maxLength: 64
+                                                    type: string
+                                                type: object
+                                            required:
+                                            - key
+                                            - op
+                                            type: object
+                                          type: array
+                                        capacitySelectors:
+                                          description: CapacitySelectors defines the
+                                            criteria which must be satisfied by the
+                                            device capacity of a device.
+                                          items:
+                                            description: DRAResourceQuantitySelector
+                                              defines the selector expression for
+                                              a DRA device capacity.
+                                            properties:
+                                              key:
+                                                description: |-
+                                                  Key is the name of the resource.
+                                                  This is either a qualified name or a simple name.
+                                                  If it is a simple name, then it is assumed to be prefixed with the DRA driver name.
+                                                  Eg: "gpu.nvidia.com/memory" is equivalent to "memory" if the driver name is "gpu.nvidia.com". Otherwise they're treated as 2 different attributes.
+                                                maxLength: 64
+                                                type: string
+                                              op:
+                                                default: Equal
+                                                description: |-
+                                                  Op is the operator to use for comparing against the device capacity. Supported operators are:
+                                                  * Equal: The resource quantity value must be equal to the value specified in the selector.
+                                                  * NotEqual: The resource quantity value must not be equal to the value specified in the selector.
+                                                  * GreaterThan: The resource quantity value must be greater than the value specified in the selector.
+                                                  * GreaterThanOrEqual: The resource quantity value must be greater than or equal to the value specified in the selector.
+                                                  * LessThan: The resource quantity value must be less than the value specified in the selector.
+                                                  * LessThanOrEqual: The resource quantity value must be less than or equal to the value specified in the selector.
+                                                enum:
+                                                - Equal
+                                                - NotEqual
+                                                - GreaterThan
+                                                - GreaterThanOrEqual
+                                                - LessThan
+                                                - LessThanOrEqual
+                                                type: string
+                                              value:
+                                                anyOf:
+                                                - type: integer
+                                                - type: string
+                                                description: Value is the resource
+                                                  quantity to compare against.
+                                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                                x-kubernetes-int-or-string: true
+                                            required:
+                                            - key
+                                            - op
+                                            - value
+                                            type: object
+                                          type: array
+                                        celExpressions:
+                                          description: CELExpressions is a list of
+                                            CEL expressions that must be satisfied
+                                            by the DRA device.
+                                          items:
+                                            type: string
+                                          type: array
+                                        count:
+                                          default: 1
+                                          description: Count is the number of devices
+                                            to request.
+                                          format: int32
+                                          type: integer
+                                        deviceClassName:
+                                          default: gpu.nvidia.com
+                                          description: DeviceClassName references
+                                            a specific DeviceClass to inherit configuration
+                                            and selectors from.
+                                          type: string
+                                        driverName:
+                                          default: gpu.nvidia.com
+                                          description: |-
+                                            DriverName is the name of the DRA driver providing the capacity information.
+                                            Must be a DNS subdomain.
+                                          maxLength: 253
+                                          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*
+                                          type: string
+                                        name:
+                                          description: |-
+                                            Name is the name of the device request to use in the generated claim spec.
+                                            Must be a valid DNS_LABEL.
+                                          maxLength: 253
+                                          minLength: 1
+                                          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*
+                                          type: string
+                                      required:
+                                      - count
+                                      - deviceClassName
+                                      - name
+                                      type: object
+                                      x-kubernetes-validations:
+                                      - message: celExpressions must not be set if
+                                          attributeSelectors or capacitySelectors
+                                          are set
+                                        rule: (has(self.celExpressions) && !(has(self.attributeSelectors)
+                                          || has(self.capacitySelectors))) || !has(self.celExpressions)
+                                    type: array
+                                  generateName:
+                                    description: GenerateName is an optional name
+                                      prefix to use for generating the resource claim
+                                      template.
+                                    maxLength: 16
+                                    minLength: 1
+                                    type: string
+                                required:
+                                - devices
+                                type: object
+                              requests:
+                                description: |-
+                                  Requests is the list of requests in the referenced DRA resource claim.
+                                  to be made available to the model container of the NIMService pods.
+
+                                  If empty, everything from the claim is made available, otherwise
+                                  only the result of this subset of requests.
+                                items:
+                                  minLength: 1
+                                  type: string
+                                type: array
+                              resourceClaimName:
+                                description: |-
+                                  ResourceClaimName is the name of a DRA resource claim object in the same
+                                  namespace as the NIMService.
+
+                                  Exactly one of ResourceClaimName and ResourceClaimTemplateName must
+                                  be set.
+                                maxLength: 253
+                                minLength: 1
+                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*
+                                type: string
+                              resourceClaimTemplateName:
+                                description: |-
+                                  ResourceClaimTemplateName is the name of a DRA resource claim template
+                                  object in the same namespace as the pods for this NIMService.
+
+                                  The template will be used to create a new DRA resource claim, which will
+                                  be bound to the pods created for this NIMService.
+
+                                  Exactly one of ResourceClaimName and ResourceClaimTemplateName must
+                                  be set.
+                                maxLength: 253
+                                minLength: 1
+                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*
+                                type: string
+                            type: object
+                            x-kubernetes-validations:
+                            - message: exactly one of spec.resourceClaimName, spec.resourceClaimTemplateName,
+                                or spec.claimCreationSpec must be set.
+                              rule: '(has(self.resourceClaimName) ? 1 : 0) + (has(self.resourceClaimTemplateName)
+                                ? 1 : 0) + (has(self.claimCreationSpec) ? 1 : 0) ==
+                                1'
+                          type: array
                         env:
                           items:
                             description: EnvVar represents an environment variable
@@ -575,6 +809,15 @@ spec:
                           - repository
                           - tag
                           type: object
+                        inferencePlatform:
+                          default: standalone
+                          description: |-
+                            InferencePlatform specifies the inference platform to use for this NIMService.
+                            Valid values are "standalone" (default) and "kserve".
+                          enum:
+                          - standalone
+                          - kserve
+                          type: string
                         labels:
                           additionalProperties:
                             type: string
@@ -591,7 +834,8 @@ spec:
                                 alive or ready to receive traffic.
                               properties:
                                 exec:
-                                  description: Exec specifies the action to take.
+                                  description: Exec specifies a command to execute
+                                    in the container.
                                   properties:
                                     command:
                                       description: |-
@@ -612,8 +856,7 @@ spec:
                                   format: int32
                                   type: integer
                                 grpc:
-                                  description: GRPC specifies an action involving
-                                    a GRPC port.
+                                  description: GRPC specifies a GRPC HealthCheckRequest.
                                   properties:
                                     port:
                                       description: Port number of the gRPC service.
@@ -632,7 +875,7 @@ spec:
                                   - port
                                   type: object
                                 httpGet:
-                                  description: HTTPGet specifies the http request
+                                  description: HTTPGet specifies an HTTP GET request
                                     to perform.
                                   properties:
                                     host:
@@ -700,7 +943,7 @@ spec:
                                   format: int32
                                   type: integer
                                 tcpSocket:
-                                  description: TCPSocket specifies an action involving
+                                  description: TCPSocket specifies a connection to
                                     a TCP port.
                                   properties:
                                     host:
@@ -775,6 +1018,49 @@ spec:
                                   pattern: ^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$
                                   type: string
                               type: object
+                          type: object
+                        multiNode:
+                          description: NimServiceMultiNodeConfig defines the configuration
+                            for multi-node NIMService.
+                          properties:
+                            backendType:
+                              default: lws
+                              description: BackendType specifies the backend type
+                                for the multi-node NIMService. Currently only LWS
+                                is supported.
+                              enum:
+                              - lws
+                              type: string
+                            mpi:
+                              description: MPI config for NIMService using LeaderWorkerSet
+                              properties:
+                                mpiStartTimeout:
+                                  default: 300
+                                  description: MPIStartTimeout specifies the timeout
+                                    in seconds for starting the cluster.
+                                  type: integer
+                              required:
+                              - mpiStartTimeout
+                              type: object
+                            parallelism:
+                              description: Parallelism specifies the parallelism strategy
+                                for the multi-node NIMService.
+                              properties:
+                                pipeline:
+                                  description: Pipeline specifies pipeline parallelism
+                                    size for the multi-node NIMService.
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                tensor:
+                                  description: Tensor specifies tensor parallelism
+                                    size for the multi-node NIMService.
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                              type: object
+                          required:
+                          - parallelism
                           type: object
                         nodeSelector:
                           additionalProperties:
@@ -863,7 +1149,6 @@ spec:
                                           pod labels will be ignored. The default value is empty.
                                           The same key is forbidden to exist in both matchLabelKeys and labelSelector.
                                           Also, matchLabelKeys cannot be set when labelSelector isn't set.
-                                          This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).
                                         items:
                                           type: string
                                         type: array
@@ -878,7 +1163,6 @@ spec:
                                           pod labels will be ignored. The default value is empty.
                                           The same key is forbidden to exist in both mismatchLabelKeys and labelSelector.
                                           Also, mismatchLabelKeys cannot be set when labelSelector isn't set.
-                                          This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).
                                         items:
                                           type: string
                                         type: array
@@ -1045,7 +1329,6 @@ spec:
                                       pod labels will be ignored. The default value is empty.
                                       The same key is forbidden to exist in both matchLabelKeys and labelSelector.
                                       Also, matchLabelKeys cannot be set when labelSelector isn't set.
-                                      This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).
                                     items:
                                       type: string
                                     type: array
@@ -1060,7 +1343,6 @@ spec:
                                       pod labels will be ignored. The default value is empty.
                                       The same key is forbidden to exist in both mismatchLabelKeys and labelSelector.
                                       Also, mismatchLabelKeys cannot be set when labelSelector isn't set.
-                                      This is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).
                                     items:
                                       type: string
                                     type: array
@@ -1166,7 +1448,8 @@ spec:
                                 alive or ready to receive traffic.
                               properties:
                                 exec:
-                                  description: Exec specifies the action to take.
+                                  description: Exec specifies a command to execute
+                                    in the container.
                                   properties:
                                     command:
                                       description: |-
@@ -1187,8 +1470,7 @@ spec:
                                   format: int32
                                   type: integer
                                 grpc:
-                                  description: GRPC specifies an action involving
-                                    a GRPC port.
+                                  description: GRPC specifies a GRPC HealthCheckRequest.
                                   properties:
                                     port:
                                       description: Port number of the gRPC service.
@@ -1207,7 +1489,7 @@ spec:
                                   - port
                                   type: object
                                 httpGet:
-                                  description: HTTPGet specifies the http request
+                                  description: HTTPGet specifies an HTTP GET request
                                     to perform.
                                   properties:
                                     host:
@@ -1275,7 +1557,7 @@ spec:
                                   format: int32
                                   type: integer
                                 tcpSocket:
-                                  description: TCPSocket specifies an action involving
+                                  description: TCPSocket specifies a connection to
                                     a TCP port.
                                   properties:
                                     host:
@@ -1322,8 +1604,11 @@ spec:
                           minimum: 1
                           type: integer
                         resources:
-                          description: ResourceRequirements describes the compute
-                            resource requirements.
+                          description: |-
+                            Resources is the resource requirements for the NIMService deployment or leader worker set.
+
+                            Note: Only traditional resources like cpu/memory and custom device plugin resources are supported here.
+                            Any DRA claim references are ignored. Use DRAResources instead for those.
                           properties:
                             claims:
                               description: |-
@@ -1413,7 +1698,9 @@ spec:
                                         policies:
                                           description: |-
                                             policies is a list of potential scaling polices which can be used during scaling.
-                                            At least one policy must be specified, otherwise the HPAScalingRules will be discarded as invalid
+                                            If not set, use the default values:
+                                            - For scale up: allow doubling the number of pods, or an absolute change of 4 pods in a 15s window.
+                                            - For scale down: allow all pods to be removed in a 15s window.
                                           items:
                                             description: HPAScalingPolicy is a single
                                               policy which must hold true for a specified
@@ -1457,6 +1744,24 @@ spec:
                                             - For scale down: 300 (i.e. the stabilization window is 300 seconds long).
                                           format: int32
                                           type: integer
+                                        tolerance:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: |-
+                                            tolerance is the tolerance on the ratio between the current and desired
+                                            metric value under which no updates are made to the desired number of
+                                            replicas (e.g. 0.01 for 1%). Must be greater than or equal to zero. If not
+                                            set, the default cluster-wide tolerance is applied (by default 10%).
+
+                                            For example, if autoscaling is configured with a memory consumption target of 100Mi,
+                                            and scale-down and scale-up tolerances of 5% and 1% respectively, scaling will be
+                                            triggered when the actual consumption falls below 95Mi or exceeds 101Mi.
+
+                                            This is an alpha field and requires enabling the HPAConfigurableTolerance
+                                            feature gate.
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
                                       type: object
                                     scaleUp:
                                       description: |-
@@ -1469,7 +1774,9 @@ spec:
                                         policies:
                                           description: |-
                                             policies is a list of potential scaling polices which can be used during scaling.
-                                            At least one policy must be specified, otherwise the HPAScalingRules will be discarded as invalid
+                                            If not set, use the default values:
+                                            - For scale up: allow doubling the number of pods, or an absolute change of 4 pods in a 15s window.
+                                            - For scale down: allow all pods to be removed in a 15s window.
                                           items:
                                             description: HPAScalingPolicy is a single
                                               policy which must hold true for a specified
@@ -1513,6 +1820,24 @@ spec:
                                             - For scale down: 300 (i.e. the stabilization window is 300 seconds long).
                                           format: int32
                                           type: integer
+                                        tolerance:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: |-
+                                            tolerance is the tolerance on the ratio between the current and desired
+                                            metric value under which no updates are made to the desired number of
+                                            replicas (e.g. 0.01 for 1%). Must be greater than or equal to zero. If not
+                                            set, the default cluster-wide tolerance is applied (by default 10%).
+
+                                            For example, if autoscaling is configured with a memory consumption target of 100Mi,
+                                            and scale-down and scale-up tolerances of 5% and 1% respectively, scaling will be
+                                            triggered when the actual consumption falls below 95Mi or exceeds 101Mi.
+
+                                            This is an alpha field and requires enabling the HPAConfigurableTolerance
+                                            feature gate.
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
                                       type: object
                                   type: object
                                 maxReplicas:
@@ -1531,7 +1856,6 @@ spec:
                                           each pod of the current scale target (e.g. CPU or memory). Such metrics are
                                           built in to Kubernetes, and have special scaling options on top of those
                                           available to normal per-pod metrics using the "pods" source.
-                                          This is an alpha feature and can be enabled by the HPAContainerMetrics feature flag.
                                         properties:
                                           container:
                                             description: container is the name of
@@ -1994,8 +2318,6 @@ spec:
                                         description: |-
                                           type is the type of metric source.  It should be one of "ContainerResource", "External",
                                           "Object", "Pods" or "Resource", each mapping to a matching field in the object.
-                                          Note: "ContainerResource" type is available on when the feature-gate
-                                          HPAContainerMetrics is enabled
                                         type: string
                                     required:
                                     - type
@@ -2022,7 +2344,8 @@ spec:
                                 alive or ready to receive traffic.
                               properties:
                                 exec:
-                                  description: Exec specifies the action to take.
+                                  description: Exec specifies a command to execute
+                                    in the container.
                                   properties:
                                     command:
                                       description: |-
@@ -2043,8 +2366,7 @@ spec:
                                   format: int32
                                   type: integer
                                 grpc:
-                                  description: GRPC specifies an action involving
-                                    a GRPC port.
+                                  description: GRPC specifies a GRPC HealthCheckRequest.
                                   properties:
                                     port:
                                       description: Port number of the gRPC service.
@@ -2063,7 +2385,7 @@ spec:
                                   - port
                                   type: object
                                 httpGet:
-                                  description: HTTPGet specifies the http request
+                                  description: HTTPGet specifies an HTTP GET request
                                     to perform.
                                   properties:
                                     host:
@@ -2131,7 +2453,7 @@ spec:
                                   format: int32
                                   type: integer
                                 tcpSocket:
-                                  description: TCPSocket specifies an action involving
+                                  description: TCPSocket specifies a connection to
                                     a TCP port.
                                   properties:
                                     host:
@@ -2226,13 +2548,6 @@ spec:
                                     mode of the PVC
                                   type: string
                               type: object
-                              x-kubernetes-validations:
-                              - message: size is required for pvc creation
-                                rule: '!has(self.create) || !self.create || (has(self.size)
-                                  && self.size != "")'
-                              - message: volumeAccessMode is required for pvc creation
-                                rule: '!has(self.create) || !self.create || (has(self.volumeAccessMode)
-                                  && self.volumeAccessMode != "")'
                             readOnly:
                               description: ReadOnly mode indicates if the volume should
                                 be mounted as read-only
@@ -2292,6 +2607,11 @@ spec:
                       - authSecret
                       - image
                       type: object
+                      x-kubernetes-validations:
+                      - message: autoScaling must be nil or disabled when multiNode
+                          is set
+                        rule: '!(has(self.multiNode) && has(self.scale) && has(self.scale.enabled)
+                          && self.scale.enabled)'
                   type: object
                 type: array
             type: object

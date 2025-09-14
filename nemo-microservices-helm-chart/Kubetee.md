@@ -22,7 +22,7 @@ kubectl create secret generic hf-token -n nemo --from-literal=HF_TOKEN=YOUR_HUGG
 ## Helm Chat Install
 
 ```sh
-helm upgrade --install nemo nmp/nemo-microservices-helm-chart --version 25.8.0 -n nemo -f nemo-microservices-helm-chart/values-nemo-staging.yaml
+helm upgrade --install nemo nmp/nemo-microservices-helm-chart --version 25.9.0 -n nemo -f nemo-microservices-helm-chart/values-nemo-kubetee.yaml
 ```
 
 ## Deploy GPT-OSS-20B

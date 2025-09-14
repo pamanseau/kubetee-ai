@@ -236,6 +236,32 @@ rules:
   - patch
   - update
 - apiGroups:
+    - apps.nvidia.com
+  resources:
+    - nimbuilds
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - apps.nvidia.com
+  resources:
+    - nimbuilds/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - apps.nvidia.com
+  resources:
+    - nimbuilds/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
   - apps.nvidia.com
   resources:
   - nimpipelines
@@ -351,6 +377,17 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - resource.k8s.io
+  resources:
+  - resourceclaims
+  - resourceclaimtemplates
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
 - apiGroups:
   - route.openshift.io
   resources:
@@ -499,6 +536,52 @@ rules:
   - list
   - watch
   - delete
+  - patch
+  - update
+- apiGroups:
+  - leaderworkerset.x-k8s.io
+  resources:
+  - leaderworkersets
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - delete
+  - patch
+  - update
+- apiGroups:
+  - serving.kserve.io
+  resources:
+  - inferenceservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - leaderworkerset.x-k8s.io
+  resources:
+  - leaderworkersets
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - delete
+  - patch
+  - update
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - get
+  - list
+  - watch
   - patch
   - update
 

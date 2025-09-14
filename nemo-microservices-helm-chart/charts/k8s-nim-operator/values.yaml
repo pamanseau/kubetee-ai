@@ -3,13 +3,22 @@ operator:
   upgradeCRD: true
   image:
     repository: nvcr.io/nvidia/cloud-native/k8s-nim-operator
-    tag: v2.0.2
+    tag: v3.0.0
     pullSecrets: []
     pullPolicy: Always
   args:
     - --health-probe-bind-address=:8081
     - --metrics-bind-address=:8080
     - --leader-elect
+  log:
+    # Enable development mode
+    development: false
+    # Log verbosity level (debug | info | warn | error | dpanic | panic | fatal)
+    level: info
+    # Stacktrace generation level (debug | info | warn | error | dpanic | panic | fatal)
+    stacktraceLevel: error
+    # Log encoder format (json|console)
+    encoder: json
   resources:
       limits:
         cpu: "1"
@@ -44,6 +53,10 @@ operator:
     capabilities:
       drop:
         - ALL
+  admissionController:
+    # Enable the admission controller. 
+    # Note: cert-manager must be installed beforehand, as it is required to generate the TLS certificates.
+    enabled: false
 
 metricsService:
   ports:
